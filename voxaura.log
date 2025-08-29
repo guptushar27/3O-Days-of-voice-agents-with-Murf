@@ -1,0 +1,207 @@
+2025-08-16 09:21:18,610 - engineio.server - INFO - Server initialized for threading.
+2025-08-16 09:21:18,951 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.80.34:5000
+2025-08-16 09:21:18,952 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 09:21:18,952 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 09:21:20,418 - engineio.server - INFO - Server initialized for threading.
+2025-08-16 09:21:20,538 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 09:21:20,538 - werkzeug - INFO -  * Debugger PIN: 119-774-280
+2025-08-16 09:21:20,727 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:20] "GET / HTTP/1.1" 200 -
+2025-08-16 09:21:20,851 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:20] "GET / HTTP/1.1" 200 -
+2025-08-16 09:21:20,892 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:20] "GET / HTTP/1.1" 200 -
+2025-08-16 09:21:20,975 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:20] "GET / HTTP/1.1" 200 -
+2025-08-16 09:21:21,025 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:21] "GET / HTTP/1.1" 200 -
+2025-08-16 09:21:22,064 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:22] "[33mGET /agent/chat/voxaura_1755336082798_9ggdo5wqc0t/history HTTP/1.1[0m" 404 -
+2025-08-16 09:21:22,062 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Sending packet OPEN data {'sid': 'AHlLX0kMu8E-vWHIAAAA', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:21:22,066 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:22] "GET /socket.io/?EIO=4&transport=polling&t=PYoBmKu HTTP/1.1" 200 -
+2025-08-16 09:21:23,473 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Sending packet OPEN data {'sid': 'OC1Q-eyJsR8l8h1GAAAB', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:21:23,473 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:23] "GET /socket.io/?EIO=4&transport=polling&t=PYoBmhf HTTP/1.1" 200 -
+2025-08-16 09:21:23,476 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:23] "[33mGET /agent/chat/voxaura_1755336084211_wdjlyuf7g7o/history HTTP/1.1[0m" 404 -
+2025-08-16 09:21:24,547 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Sending packet OPEN data {'sid': 'jWsvI0zDh7R7wgvjAAAC', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:21:24,547 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:24] "GET /socket.io/?EIO=4&transport=polling&t=PYoBmyV HTTP/1.1" 200 -
+2025-08-16 09:21:24,553 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:24] "[33mGET /agent/chat/voxaura_1755336085287_of2a4bo8f8m/history HTTP/1.1[0m" 404 -
+2025-08-16 09:21:25,859 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Received packet MESSAGE data 0
+2025-08-16 09:21:25,860 - app - INFO - Client connected: UBmhP7US-yXUY8ykAAAD
+2025-08-16 09:21:25,860 - services.websocket_service - INFO - Registered session default for socket UBmhP7US-yXUY8ykAAAD
+2025-08-16 09:21:25,860 - socketio.server - INFO - emitting event "status" to UBmhP7US-yXUY8ykAAAD [/]
+2025-08-16 09:21:25,860 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"UBmhP7US-yXUY8ykAAAD","active_sessions":1}]
+2025-08-16 09:21:25,861 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Sending packet MESSAGE data 0{"sid":"UBmhP7US-yXUY8ykAAAD"}
+2025-08-16 09:21:25,861 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:25] "POST /socket.io/?EIO=4&transport=polling&t=PYoBnH1&sid=AHlLX0kMu8E-vWHIAAAA HTTP/1.1" 200 -
+2025-08-16 09:21:25,865 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:25] "GET /socket.io/?EIO=4&transport=polling&t=PYoBnHA&sid=AHlLX0kMu8E-vWHIAAAA HTTP/1.1" 200 -
+2025-08-16 09:21:25,929 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Sending packet OPEN data {'sid': 'nsyqkJd0dbWwcBvyAAAE', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:21:25,930 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:25] "GET /socket.io/?EIO=4&transport=polling&t=PYoBnHr HTTP/1.1" 200 -
+2025-08-16 09:21:25,934 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:25] "[33mGET /agent/chat/voxaura_1755336086664_x3iuiv0flbi/history HTTP/1.1[0m" 404 -
+2025-08-16 09:21:25,987 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Received request to upgrade to websocket
+2025-08-16 09:21:27,275 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:27] "[33mGET /agent/chat/voxaura_1755336088012_8z77nx62tg6/history HTTP/1.1[0m" 404 -
+2025-08-16 09:21:27,277 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Sending packet OPEN data {'sid': 'xN-xuUC5BP4aMX3GAAAF', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:21:27,277 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:27] "GET /socket.io/?EIO=4&transport=polling&t=PYoBnc_ HTTP/1.1" 200 -
+2025-08-16 09:21:28,683 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Received packet MESSAGE data 0
+2025-08-16 09:21:28,684 - app - INFO - Client connected: tNTycu-gUkn1S1WhAAAG
+2025-08-16 09:21:28,685 - services.websocket_service - INFO - Registered session default for socket tNTycu-gUkn1S1WhAAAG
+2025-08-16 09:21:28,685 - socketio.server - INFO - emitting event "status" to tNTycu-gUkn1S1WhAAAG [/]
+2025-08-16 09:21:28,685 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"tNTycu-gUkn1S1WhAAAG","active_sessions":2}]
+2025-08-16 09:21:28,685 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoBnzA&sid=OC1Q-eyJsR8l8h1GAAAB HTTP/1.1" 200 -
+2025-08-16 09:21:28,686 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Sending packet MESSAGE data 0{"sid":"tNTycu-gUkn1S1WhAAAG"}
+2025-08-16 09:21:28,686 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoBnz6&sid=OC1Q-eyJsR8l8h1GAAAB HTTP/1.1" 200 -
+2025-08-16 09:21:28,691 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Received packet MESSAGE data 0
+2025-08-16 09:21:28,692 - app - INFO - Client connected: dtlJ7kF7Wnkkl_i9AAAH
+2025-08-16 09:21:28,692 - services.websocket_service - INFO - Registered session default for socket dtlJ7kF7Wnkkl_i9AAAH
+2025-08-16 09:21:28,692 - socketio.server - INFO - emitting event "status" to dtlJ7kF7Wnkkl_i9AAAH [/]
+2025-08-16 09:21:28,692 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"dtlJ7kF7Wnkkl_i9AAAH","active_sessions":3}]
+2025-08-16 09:21:28,692 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Sending packet MESSAGE data 0{"sid":"dtlJ7kF7Wnkkl_i9AAAH"}
+2025-08-16 09:21:28,693 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoBnzF&sid=jWsvI0zDh7R7wgvjAAAC HTTP/1.1" 200 -
+2025-08-16 09:21:28,696 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoBnzL&sid=jWsvI0zDh7R7wgvjAAAC HTTP/1.1" 200 -
+2025-08-16 09:21:28,731 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoBnzf&sid=AHlLX0kMu8E-vWHIAAAA HTTP/1.1" 200 -
+2025-08-16 09:21:28,793 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Received request to upgrade to websocket
+2025-08-16 09:21:28,847 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Received packet MESSAGE data 0
+2025-08-16 09:21:28,848 - app - INFO - Client connected: jAoDi6pElMtSXySbAAAI
+2025-08-16 09:21:28,848 - services.websocket_service - INFO - Registered session default for socket jAoDi6pElMtSXySbAAAI
+2025-08-16 09:21:28,848 - socketio.server - INFO - emitting event "status" to jAoDi6pElMtSXySbAAAI [/]
+2025-08-16 09:21:28,848 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"jAoDi6pElMtSXySbAAAI","active_sessions":4}]
+2025-08-16 09:21:28,848 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Sending packet MESSAGE data 0{"sid":"jAoDi6pElMtSXySbAAAI"}
+2025-08-16 09:21:28,849 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoBn_h&sid=nsyqkJd0dbWwcBvyAAAE HTTP/1.1" 200 -
+2025-08-16 09:21:28,860 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoBn_n&sid=nsyqkJd0dbWwcBvyAAAE HTTP/1.1" 200 -
+2025-08-16 09:21:28,882 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Received packet MESSAGE data 0
+2025-08-16 09:21:28,883 - app - INFO - Client connected: -FO3M4nqab_YcwX-AAAJ
+2025-08-16 09:21:28,884 - services.websocket_service - INFO - Registered session default for socket -FO3M4nqab_YcwX-AAAJ
+2025-08-16 09:21:28,884 - socketio.server - INFO - emitting event "status" to -FO3M4nqab_YcwX-AAAJ [/]
+2025-08-16 09:21:28,884 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"-FO3M4nqab_YcwX-AAAJ","active_sessions":5}]
+2025-08-16 09:21:28,884 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo0G&sid=xN-xuUC5BP4aMX3GAAAF HTTP/1.1" 200 -
+2025-08-16 09:21:28,884 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Sending packet MESSAGE data 0{"sid":"-FO3M4nqab_YcwX-AAAJ"}
+2025-08-16 09:21:28,885 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoBo0D&sid=xN-xuUC5BP4aMX3GAAAF HTTP/1.1" 200 -
+2025-08-16 09:21:28,935 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo12&sid=OC1Q-eyJsR8l8h1GAAAB HTTP/1.1" 200 -
+2025-08-16 09:21:28,956 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo1O&sid=AHlLX0kMu8E-vWHIAAAA HTTP/1.1" 200 -
+2025-08-16 09:21:28,960 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Received request to upgrade to websocket
+2025-08-16 09:21:29,091 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo3V&sid=xN-xuUC5BP4aMX3GAAAF HTTP/1.1" 200 -
+2025-08-16 09:21:29,094 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo3c&sid=OC1Q-eyJsR8l8h1GAAAB HTTP/1.1" 200 -
+2025-08-16 09:21:29,123 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo3i&sid=AHlLX0kMu8E-vWHIAAAA HTTP/1.1" 200 -
+2025-08-16 09:21:29,156 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo1A&sid=jWsvI0zDh7R7wgvjAAAC HTTP/1.1" 200 -
+2025-08-16 09:21:29,164 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Received request to upgrade to websocket
+2025-08-16 09:21:29,170 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Upgrade to websocket successful
+2025-08-16 09:21:29,334 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Received request to upgrade to websocket
+2025-08-16 09:21:29,580 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Upgrade to websocket successful
+2025-08-16 09:21:29,585 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Upgrade to websocket successful
+2025-08-16 09:21:29,646 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo3K&sid=nsyqkJd0dbWwcBvyAAAE HTTP/1.1" 200 -
+2025-08-16 09:21:29,934 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoBo4x&sid=xN-xuUC5BP4aMX3GAAAF HTTP/1.1" 200 -
+2025-08-16 09:21:29,987 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:21:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoBoGz&sid=nsyqkJd0dbWwcBvyAAAE HTTP/1.1" 200 -
+2025-08-16 09:21:30,222 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Upgrade to websocket successful
+2025-08-16 09:21:30,235 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Upgrade to websocket successful
+2025-08-16 09:21:47,066 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Sending packet PING data None
+2025-08-16 09:21:47,104 - engineio.server - INFO - AHlLX0kMu8E-vWHIAAAA: Received packet PONG data 
+2025-08-16 09:21:48,473 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Sending packet PING data None
+2025-08-16 09:21:48,507 - engineio.server - INFO - OC1Q-eyJsR8l8h1GAAAB: Received packet PONG data 
+2025-08-16 09:21:49,547 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Sending packet PING data None
+2025-08-16 09:21:49,592 - engineio.server - INFO - jWsvI0zDh7R7wgvjAAAC: Received packet PONG data 
+2025-08-16 09:21:50,930 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Sending packet PING data None
+2025-08-16 09:21:50,969 - engineio.server - INFO - nsyqkJd0dbWwcBvyAAAE: Received packet PONG data 
+2025-08-16 09:21:52,277 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Sending packet PING data None
+2025-08-16 09:21:52,313 - engineio.server - INFO - xN-xuUC5BP4aMX3GAAAF: Received packet PONG data 
+2025-08-16 09:23:20,244 - engineio.server - INFO - Server initialized for threading.
+2025-08-16 09:23:20,353 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.80.34:5000
+2025-08-16 09:23:20,354 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 09:23:20,354 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 09:23:22,086 - engineio.server - INFO - Server initialized for threading.
+2025-08-16 09:23:22,227 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 09:23:22,227 - werkzeug - INFO -  * Debugger PIN: 119-774-280
+2025-08-16 09:23:22,353 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:22] "GET / HTTP/1.1" 200 -
+2025-08-16 09:23:22,424 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:22] "GET / HTTP/1.1" 200 -
+2025-08-16 09:23:22,466 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:22] "GET / HTTP/1.1" 200 -
+2025-08-16 09:23:22,482 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:22] "GET / HTTP/1.1" 200 -
+2025-08-16 09:23:22,488 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:22] "GET / HTTP/1.1" 200 -
+2025-08-16 09:23:23,336 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Sending packet OPEN data {'sid': 'IhM5UyQWSQ-XkgdzAAAA', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:23:23,337 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:23] "GET /socket.io/?EIO=4&transport=polling&t=PYoCDyI HTTP/1.1" 200 -
+2025-08-16 09:23:23,345 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:23] "[33mGET /agent/chat/voxaura_1755336204065_w3l5gv3sbis/history HTTP/1.1[0m" 404 -
+2025-08-16 09:23:24,357 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Sending packet OPEN data {'sid': 'MdTeRSw_LQ0ifpaWAAAB', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:23:24,358 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:24] "GET /socket.io/?EIO=4&transport=polling&t=PYoCECA HTTP/1.1" 200 -
+2025-08-16 09:23:24,362 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:24] "[33mGET /agent/chat/voxaura_1755336205090_05nzgnn4h1iy/history HTTP/1.1[0m" 404 -
+2025-08-16 09:23:25,276 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Sending packet OPEN data {'sid': '_AgKYFgtNUk5PzOIAAAC', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:23:25,278 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:25] "[33mGET /agent/chat/voxaura_1755336206005_w8j6of5hidq/history HTTP/1.1[0m" 404 -
+2025-08-16 09:23:25,284 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:25] "GET /socket.io/?EIO=4&transport=polling&t=PYoCEQh HTTP/1.1" 200 -
+2025-08-16 09:23:26,395 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Sending packet OPEN data {'sid': 'KEVSTr2m4pfb_KAQAAAD', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:23:26,396 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:26] "GET /socket.io/?EIO=4&transport=polling&t=PYoCEh- HTTP/1.1" 200 -
+2025-08-16 09:23:26,398 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:26] "[33mGET /agent/chat/voxaura_1755336207118_k91vjvip0ys/history HTTP/1.1[0m" 404 -
+2025-08-16 09:23:27,425 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Received packet MESSAGE data 0
+2025-08-16 09:23:27,426 - app - INFO - Client connected: eotidlKmtg-iYrLBAAAE
+2025-08-16 09:23:27,427 - services.websocket_service - INFO - Registered session default for socket eotidlKmtg-iYrLBAAAE
+2025-08-16 09:23:27,427 - socketio.server - INFO - emitting event "status" to eotidlKmtg-iYrLBAAAE [/]
+2025-08-16 09:23:27,427 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"eotidlKmtg-iYrLBAAAE","active_sessions":1}]
+2025-08-16 09:23:27,427 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Sending packet MESSAGE data 0{"sid":"eotidlKmtg-iYrLBAAAE"}
+2025-08-16 09:23:27,427 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:27] "POST /socket.io/?EIO=4&transport=polling&t=PYoCEyR&sid=IhM5UyQWSQ-XkgdzAAAA HTTP/1.1" 200 -
+2025-08-16 09:23:27,429 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:27] "GET /socket.io/?EIO=4&transport=polling&t=PYoCEyV&sid=IhM5UyQWSQ-XkgdzAAAA HTTP/1.1" 200 -
+2025-08-16 09:23:27,447 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Sending packet OPEN data {'sid': 'iLOpcstdhSD31HSOAAAF', 'upgrades': ['websocket'], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-08-16 09:23:27,448 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:27] "GET /socket.io/?EIO=4&transport=polling&t=PYoCEye HTTP/1.1" 200 -
+2025-08-16 09:23:27,450 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:27] "[33mGET /agent/chat/voxaura_1755336208179_khchgvs5pm/history HTTP/1.1[0m" 404 -
+2025-08-16 09:23:27,538 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Received request to upgrade to websocket
+2025-08-16 09:23:28,541 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Received packet MESSAGE data 0
+2025-08-16 09:23:28,542 - app - INFO - Client connected: ZO_zEdajd-dbRfhTAAAG
+2025-08-16 09:23:28,542 - services.websocket_service - INFO - Registered session default for socket ZO_zEdajd-dbRfhTAAAG
+2025-08-16 09:23:28,542 - socketio.server - INFO - emitting event "status" to ZO_zEdajd-dbRfhTAAAG [/]
+2025-08-16 09:23:28,542 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"ZO_zEdajd-dbRfhTAAAG","active_sessions":2}]
+2025-08-16 09:23:28,543 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Sending packet MESSAGE data 0{"sid":"ZO_zEdajd-dbRfhTAAAG"}
+2025-08-16 09:23:28,543 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoCFDt&sid=MdTeRSw_LQ0ifpaWAAAB HTTP/1.1" 200 -
+2025-08-16 09:23:28,545 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFDw&sid=MdTeRSw_LQ0ifpaWAAAB HTTP/1.1" 200 -
+2025-08-16 09:23:28,547 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Received packet MESSAGE data 0
+2025-08-16 09:23:28,548 - app - INFO - Client connected: knrXWQGsq8ptSK00AAAH
+2025-08-16 09:23:28,548 - services.websocket_service - INFO - Registered session default for socket knrXWQGsq8ptSK00AAAH
+2025-08-16 09:23:28,548 - socketio.server - INFO - emitting event "status" to knrXWQGsq8ptSK00AAAH [/]
+2025-08-16 09:23:28,548 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"knrXWQGsq8ptSK00AAAH","active_sessions":3}]
+2025-08-16 09:23:28,548 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Sending packet MESSAGE data 0{"sid":"knrXWQGsq8ptSK00AAAH"}
+2025-08-16 09:23:28,549 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoCFD-&sid=_AgKYFgtNUk5PzOIAAAC HTTP/1.1" 200 -
+2025-08-16 09:23:28,553 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFE0&sid=_AgKYFgtNUk5PzOIAAAC HTTP/1.1" 200 -
+2025-08-16 09:23:28,574 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Received packet MESSAGE data 0
+2025-08-16 09:23:28,575 - app - INFO - Client connected: fHTQ1RAozs9_lAWpAAAI
+2025-08-16 09:23:28,575 - services.websocket_service - INFO - Registered session default for socket fHTQ1RAozs9_lAWpAAAI
+2025-08-16 09:23:28,575 - socketio.server - INFO - emitting event "status" to fHTQ1RAozs9_lAWpAAAI [/]
+2025-08-16 09:23:28,575 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"fHTQ1RAozs9_lAWpAAAI","active_sessions":4}]
+2025-08-16 09:23:28,575 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Sending packet MESSAGE data 0{"sid":"fHTQ1RAozs9_lAWpAAAI"}
+2025-08-16 09:23:28,575 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoCFEJ&sid=KEVSTr2m4pfb_KAQAAAD HTTP/1.1" 200 -
+2025-08-16 09:23:28,578 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFEO&sid=KEVSTr2m4pfb_KAQAAAD HTTP/1.1" 200 -
+2025-08-16 09:23:28,633 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Received packet MESSAGE data 0
+2025-08-16 09:23:28,634 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFFD&sid=IhM5UyQWSQ-XkgdzAAAA HTTP/1.1" 200 -
+2025-08-16 09:23:28,635 - app - INFO - Client connected: RYJIyOR39EE5xx1KAAAJ
+2025-08-16 09:23:28,635 - services.websocket_service - INFO - Registered session default for socket RYJIyOR39EE5xx1KAAAJ
+2025-08-16 09:23:28,635 - socketio.server - INFO - emitting event "status" to RYJIyOR39EE5xx1KAAAJ [/]
+2025-08-16 09:23:28,636 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Sending packet MESSAGE data 2["status",{"message":"Connected to VoxAura WebSocket server","connected":true,"socket_id":"RYJIyOR39EE5xx1KAAAJ","active_sessions":5}]
+2025-08-16 09:23:28,636 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Sending packet MESSAGE data 0{"sid":"RYJIyOR39EE5xx1KAAAJ"}
+2025-08-16 09:23:28,636 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "POST /socket.io/?EIO=4&transport=polling&t=PYoCFFI&sid=iLOpcstdhSD31HSOAAAF HTTP/1.1" 200 -
+2025-08-16 09:23:28,639 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFFL&sid=iLOpcstdhSD31HSOAAAF HTTP/1.1" 200 -
+2025-08-16 09:23:28,638 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Received request to upgrade to websocket
+2025-08-16 09:23:28,678 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFFx&sid=MdTeRSw_LQ0ifpaWAAAB HTTP/1.1" 200 -
+2025-08-16 09:23:28,743 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFGy&sid=IhM5UyQWSQ-XkgdzAAAA HTTP/1.1" 200 -
+2025-08-16 09:23:28,806 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Received request to upgrade to websocket
+2025-08-16 09:23:28,926 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:28] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFJs&sid=MdTeRSw_LQ0ifpaWAAAB HTTP/1.1" 200 -
+2025-08-16 09:23:28,948 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Received request to upgrade to websocket
+2025-08-16 09:23:29,123 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Upgrade to websocket successful
+2025-08-16 09:23:29,124 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Received request to upgrade to websocket
+2025-08-16 09:23:29,222 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Upgrade to websocket successful
+2025-08-16 09:23:29,464 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFGE&sid=_AgKYFgtNUk5PzOIAAAC HTTP/1.1" 200 -
+2025-08-16 09:23:29,588 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFGO&sid=KEVSTr2m4pfb_KAQAAAD HTTP/1.1" 200 -
+2025-08-16 09:23:29,610 - werkzeug - INFO - 172.31.80.34 - - [16/Aug/2025 09:23:29] "GET /socket.io/?EIO=4&transport=polling&t=PYoCFH1&sid=iLOpcstdhSD31HSOAAAF HTTP/1.1" 200 -
+2025-08-16 09:23:29,624 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Upgrade to websocket successful
+2025-08-16 09:23:29,700 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Upgrade to websocket successful
+2025-08-16 09:23:29,706 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Upgrade to websocket successful
+2025-08-16 09:23:48,337 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Sending packet PING data None
+2025-08-16 09:23:48,378 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Received packet PONG data 
+2025-08-16 09:23:49,358 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Sending packet PING data None
+2025-08-16 09:23:49,395 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Received packet PONG data 
+2025-08-16 09:23:50,284 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Sending packet PING data None
+2025-08-16 09:23:50,325 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Received packet PONG data 
+2025-08-16 09:23:51,396 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Sending packet PING data None
+2025-08-16 09:23:51,435 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Received packet PONG data 
+2025-08-16 09:23:52,448 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Sending packet PING data None
+2025-08-16 09:23:52,482 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Received packet PONG data 
+2025-08-16 09:24:13,379 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Sending packet PING data None
+2025-08-16 09:24:13,415 - engineio.server - INFO - IhM5UyQWSQ-XkgdzAAAA: Received packet PONG data 
+2025-08-16 09:24:14,395 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Sending packet PING data None
+2025-08-16 09:24:14,431 - engineio.server - INFO - MdTeRSw_LQ0ifpaWAAAB: Received packet PONG data 
+2025-08-16 09:24:15,326 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Sending packet PING data None
+2025-08-16 09:24:15,358 - engineio.server - INFO - _AgKYFgtNUk5PzOIAAAC: Received packet PONG data 
+2025-08-16 09:24:16,436 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Sending packet PING data None
+2025-08-16 09:24:16,467 - engineio.server - INFO - KEVSTr2m4pfb_KAQAAAD: Received packet PONG data 
+2025-08-16 09:24:17,482 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Sending packet PING data None
+2025-08-16 09:24:17,516 - engineio.server - INFO - iLOpcstdhSD31HSOAAAF: Received packet PONG data 
