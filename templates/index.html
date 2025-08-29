@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -364,7 +363,7 @@
             max-height: 85vh;
             overflow-y: auto;
             border: 2px solid rgba(79, 172, 254, 0.4);
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
                         0 0 40px rgba(79, 172, 254, 0.3),
                         inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
@@ -379,11 +378,11 @@
         }
 
         @keyframes slideInUp {
-            from { 
+            from {
                 opacity: 0;
                 transform: translateY(30px) scale(0.95);
             }
-            to { 
+            to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
@@ -472,7 +471,7 @@
         .form-group input:focus {
             outline: none;
             border-color: #4facfe;
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.4), 
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.4),
                         inset 0 1px 3px rgba(79, 172, 254, 0.1);
             background: rgba(0, 0, 0, 0.5);
             transform: translateY(-1px);
@@ -980,6 +979,17 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1044,7 +1054,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
+
             <form class="api-settings-form" id="apiSettingsForm">
                 <div class="form-group">
                     <label for="gemini_api_key">
@@ -1248,7 +1258,10 @@
             sessionId = generateSessionId();
             currentChatId = generateChatId();
             loadSavedApiKeys();
+
+            // Initialize WebSocket with retry logic
             initializeSocket();
+
             loadChatHistoryFast();
             checkApiConfiguration();
 
@@ -1268,6 +1281,9 @@
 
             // Add event listener for hash changes
             window.addEventListener('hashchange', setActiveNavFromHash);
+
+            // Add manual connection button for users
+            addManualConnectionButton();
         }
 
         function generateSessionId() {
@@ -1307,18 +1323,25 @@
         }
 
         function initializeSocket() {
+            console.log('🔌 Initializing WebSocket connection...');
+
+            // Show connecting status immediately
+            updateConnectionStatus(false, 'Connecting...');
+
             socket = io({
                 transports: ['websocket', 'polling'],
-                timeout: 20000,
+                timeout: 10000,
                 reconnection: true,
                 reconnectionDelay: 2000,
-                reconnectionAttempts: 10,
-                forceNew: true
+                reconnectionAttempts: 5,
+                forceNew: true,
+                autoConnect: true
             });
 
             socket.on('connect', function() {
-                console.log('Connected to server');
-                updateConnectionStatus(true);
+                console.log('✅ Connected to server');
+                updateConnectionStatus(true, 'Connected');
+                hideConnectionError();
 
                 socket.emit('register_session', {
                     session_id: sessionId
@@ -1326,18 +1349,27 @@
             });
 
             socket.on('disconnect', function() {
-                console.log('Disconnected from server');
-                updateConnectionStatus(false);
+                console.log('❌ Disconnected from server');
+                updateConnectionStatus(false, 'Disconnected');
+                showConnectionError();
             });
 
             socket.on('connect_error', function(error) {
-                console.error('Connection error:', error);
-                updateConnectionStatus(false);
-                setTimeout(() => {
-                    if (!socket.connected) {
-                        socket.connect();
-                    }
-                }, 3000);
+                console.error('❌ Connection error:', error);
+                updateConnectionStatus(false, 'Connection Failed');
+                showConnectionError();
+            });
+
+            socket.on('reconnect', function() {
+                console.log('🔄 Reconnected to server');
+                updateConnectionStatus(true, 'Reconnected');
+                hideConnectionError();
+            });
+
+            socket.on('reconnect_failed', function() {
+                console.log('❌ Reconnection failed');
+                updateConnectionStatus(false, 'Connection Failed');
+                showConnectionError();
             });
 
             socket.on('chat_response', function(data) {
@@ -1350,9 +1382,17 @@
                     addMessage('user', data.text);
                 }
             });
+
+            // Force connection attempt after initialization
+            setTimeout(() => {
+                if (!socket.connected) {
+                    console.log('🔄 Force connecting...');
+                    socket.connect();
+                }
+            }, 1000);
         }
 
-        function updateConnectionStatus(connected) {
+        function updateConnectionStatus(connected, statusMessage = '') {
             const statusDot = document.getElementById('connectionStatusDot');
             const statusText = document.getElementById('connectionStatusText');
 
@@ -1360,14 +1400,125 @@
             if (statusDot && statusText && statusDot.classList) {
                 if (connected) {
                     statusDot.classList.add('connected');
-                    statusText.textContent = 'Connected';
+                    statusText.textContent = statusMessage || 'Connected';
                 } else {
                     statusDot.classList.remove('connected');
-                    statusText.textContent = 'Disconnected';
+                    statusText.textContent = statusMessage || 'Disconnected';
                 }
             } else {
                 // Fallback for missing elements
                 console.log('Connection status:', connected ? 'Connected' : 'Disconnected');
+            }
+        }
+
+        function showConnectionError() {
+            // Remove existing error if present
+            hideConnectionError();
+
+            const errorDiv = document.createElement('div');
+            errorDiv.id = 'connectionError';
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: linear-gradient(135deg, #ff4757, #ff3838);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 12px;
+                box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+                z-index: 1500;
+                font-size: 0.9rem;
+                max-width: 350px;
+                animation: slideInRight 0.3s ease;
+            `;
+
+            errorDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Connection Lost</strong>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    Unable to connect to the server. Please check your internet connection.
+                </div>
+                <button onclick="manualReconnect()" style="
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                    margin-right: 10px;
+                ">
+                    <i class="fas fa-redo"></i> Reconnect
+                </button>
+                <button onclick="hideConnectionError()" style="
+                    background: transparent;
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                ">
+                    <i class="fas fa-times"></i> Dismiss
+                </button>
+            `;
+
+            document.body.appendChild(errorDiv);
+        }
+
+        function hideConnectionError() {
+            const errorDiv = document.getElementById('connectionError');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+        }
+
+        function manualReconnect() {
+            console.log('🔄 Manual reconnection triggered');
+            updateConnectionStatus(false, 'Reconnecting...');
+
+            if (socket) {
+                socket.disconnect();
+                socket.connect();
+            } else {
+                initializeSocket();
+            }
+
+            hideConnectionError();
+        }
+
+        function addManualConnectionButton() {
+            // Add a connect button to the welcome screen for first-time users
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen) {
+                const connectBtn = document.createElement('button');
+                connectBtn.id = 'manualConnectBtn';
+                connectBtn.style.cssText = `
+                    background: linear-gradient(45deg, #4facfe, #00f2fe);
+                    border: none;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    margin-top: 20px;
+                    transition: all 0.3s ease;
+                    display: none;
+                `;
+
+                connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect to Server';
+                connectBtn.onclick = manualReconnect;
+
+                welcomeScreen.appendChild(connectBtn);
+
+                // Show connect button if not connected after 3 seconds
+                setTimeout(() => {
+                    if (!socket || !socket.connected) {
+                        connectBtn.style.display = 'inline-block';
+                    }
+                }, 3000);
             }
         }
 
@@ -1415,8 +1566,8 @@
                 });
             }
 
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768) {
+            // Close sidebar on mobile and tablet
+            if (window.innerWidth <= 1024) {
                 toggleSidebar();
             }
         }
@@ -1492,9 +1643,9 @@
 
             currentChatId = chatId;
             document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-            
+
             // Find and activate the clicked item
-            const clickedItem = Array.from(document.querySelectorAll('.chat-item')).find(item => 
+            const clickedItem = Array.from(document.querySelectorAll('.chat-item')).find(item =>
                 item.getAttribute('onclick') && item.getAttribute('onclick').includes(chatId)
             );
             if (clickedItem) {
@@ -1510,8 +1661,8 @@
             `;
             checkApiConfiguration();
 
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768) {
+            // Close sidebar on mobile and tablet
+            if (window.innerWidth <= 1024) {
                 toggleSidebar();
             }
         }
@@ -2019,7 +2170,7 @@
                 audioElement.play().then(() => {
                     if (button.classList) {
                         button.innerHTML = '<i class="fas fa-pause"></i> Pause';
-                        
+
                         audioElement.onended = () => {
                             if (button.classList) {
                                 button.innerHTML = '<i class="fas fa-play"></i> Play';
@@ -2125,7 +2276,7 @@
             const dialog = document.getElementById('settingsDialog');
             const settingsContent = document.querySelector('.settings-content');
             const settingsBtn = document.getElementById('settingsNavBtn');
-            
+
             if (dialog && dialog.classList.contains('active')) {
                 if (!settingsContent.contains(event.target) && !settingsBtn.contains(event.target)) {
                     closeSettingsDialog();
@@ -2143,7 +2294,21 @@
         });
 
         // Initialize the application when the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 VoxAura initializing...');
+            initializeApp();
+
+            // Additional check for connection after page load
+            setTimeout(() => {
+                if (!socket || !socket.connected) {
+                    console.log('⚠️ Connection not established, showing manual connect option');
+                    const connectBtn = document.getElementById('manualConnectBtn');
+                    if (connectBtn) {
+                        connectBtn.style.display = 'inline-block';
+                    }
+                }
+            }, 5000);
+        });
     </script>
 </body>
 </html>
