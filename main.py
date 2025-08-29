@@ -214,8 +214,8 @@ def llm_query():
 
         # Generate response
         result = llm_service.generate_response(
-            chat_messages=[], 
-            user_message=message, 
+            chat_messages=[],
+            user_message=message,
             persona=persona
         )
 
@@ -1110,6 +1110,7 @@ if __name__ == '__main__':
 
     # Run the application with SocketIO
     try:
+        port = int(os.environ.get('PORT', 5000))
         print(f"🚀 Starting server on port {port}")
         socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)
     except Exception as e:
