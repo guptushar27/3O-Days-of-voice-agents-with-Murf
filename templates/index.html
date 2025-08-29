@@ -204,19 +204,40 @@
             align-items: center;
             gap: 10px;
             font-size: 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 5px;
+            border: 1px solid transparent;
         }
 
         .nav-btn:hover {
             background: rgba(79, 70, 229, 0.3);
             color: #f1f5f9;
+            border-color: rgba(79, 172, 254, 0.3);
+            transform: translateX(5px);
         }
 
         .nav-btn.active {
             background: linear-gradient(135deg, #4f46e5, #6366f1);
             color: white;
             font-weight: 500;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Special styling for settings button */
+        #settingsNavBtn {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        #settingsNavBtn:hover {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: rgba(79, 172, 254, 0.4);
+            color: #4facfe;
+            transform: translateX(8px) scale(1.02);
+        }
+
+        #settingsNavBtn i {
+            color: #4facfe;
         }
 
         /* Scrollable content area without visible scrollbar */
@@ -322,11 +343,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             z-index: 2000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease;
         }
 
         .settings-dialog.active {
@@ -335,35 +357,61 @@
 
         .settings-content {
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e40af 100%);
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
+            border-radius: 20px;
+            padding: 35px;
+            width: 95%;
+            max-width: 550px;
+            max-height: 85vh;
             overflow-y: auto;
-            border: 1px solid rgba(79, 172, 254, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(79, 172, 254, 0.4);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
+                        0 0 40px rgba(79, 172, 254, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
             scrollbar-width: thin;
-            scrollbar-color: rgba(79, 172, 254, 0.6) rgba(30, 27, 75, 0.3);
+            scrollbar-color: rgba(79, 172, 254, 0.8) rgba(30, 27, 75, 0.4);
+            animation: slideInUp 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .settings-content::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         .settings-content::-webkit-scrollbar-track {
-            background: rgba(30, 27, 75, 0.3);
-            border-radius: 3px;
+            background: rgba(30, 27, 75, 0.4);
+            border-radius: 4px;
+            border: 1px solid rgba(79, 172, 254, 0.2);
         }
 
         .settings-content::-webkit-scrollbar-thumb {
-            background: rgba(79, 172, 254, 0.6);
-            border-radius: 3px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
         }
 
         .settings-content::-webkit-scrollbar-thumb:hover {
-            background: rgba(79, 172, 254, 0.8);
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.5);
+        }
+
+        .settings-content::-webkit-scrollbar-corner {
+            background: rgba(30, 27, 75, 0.4);
         }
 
         .settings-header {
@@ -411,20 +459,27 @@
 
         .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.3);
+            padding: 14px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.4);
             color: white;
             font-size: 0.9rem;
             transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #4facfe;
-            box-shadow: 0 0 15px rgba(79, 172, 254, 0.3);
-            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.4), 
+                        inset 0 1px 3px rgba(79, 172, 254, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .form-group input:hover {
+            border-color: rgba(79, 172, 254, 0.3);
         }
 
         .form-group input::placeholder {
@@ -993,15 +1048,32 @@
             <form class="api-settings-form" id="apiSettingsForm">
                 <div class="form-group">
                     <label for="gemini_api_key">
-                        <i class="fas fa-brain"></i> Google AI API Key (Gemini)
+                        <i class="fas fa-brain"></i> Gemini API Key (Google AI)
+                        <a href="https://aistudio.google.com/" target="_blank" style="color: #4facfe; text-decoration: none; margin-left: 10px;">
+                            <i class="fas fa-external-link-alt"></i> Get API Key
+                        </a>
                     </label>
                     <input type="password" id="gemini_api_key" name="gemini_api_key"
                            placeholder="Enter your Gemini API key..." autocomplete="off">
                 </div>
 
                 <div class="form-group">
+                    <label for="google_ai_api_key">
+                        <i class="fas fa-google"></i> Google AI API Key (Alternative)
+                        <a href="https://aistudio.google.com/" target="_blank" style="color: #4facfe; text-decoration: none; margin-left: 10px;">
+                            <i class="fas fa-external-link-alt"></i> Get API Key
+                        </a>
+                    </label>
+                    <input type="password" id="google_ai_api_key" name="google_ai_api_key"
+                           placeholder="Enter your Google AI API key..." autocomplete="off">
+                </div>
+
+                <div class="form-group">
                     <label for="assemblyai_api_key">
                         <i class="fas fa-microphone"></i> AssemblyAI API Key (Speech-to-Text)
+                        <a href="https://www.assemblyai.com/" target="_blank" style="color: #4facfe; text-decoration: none; margin-left: 10px;">
+                            <i class="fas fa-external-link-alt"></i> Get API Key
+                        </a>
                     </label>
                     <input type="password" id="assemblyai_api_key" name="assemblyai_api_key"
                            placeholder="Enter your AssemblyAI API key..." autocomplete="off">
@@ -1010,6 +1082,9 @@
                 <div class="form-group">
                     <label for="murf_api_key">
                         <i class="fas fa-volume-up"></i> Murf API Key (Text-to-Speech)
+                        <a href="https://murf.ai/" target="_blank" style="color: #4facfe; text-decoration: none; margin-left: 10px;">
+                            <i class="fas fa-external-link-alt"></i> Get API Key
+                        </a>
                     </label>
                     <input type="password" id="murf_api_key" name="murf_api_key"
                            placeholder="Enter your Murf API key..." autocomplete="off">
@@ -1018,6 +1093,9 @@
                 <div class="form-group">
                     <label for="openweather_api_key">
                         <i class="fas fa-cloud-sun"></i> OpenWeather API Key (Weather)
+                        <a href="https://openweathermap.org/api" target="_blank" style="color: #4facfe; text-decoration: none; margin-left: 10px;">
+                            <i class="fas fa-external-link-alt"></i> Get API Key
+                        </a>
                     </label>
                     <input type="password" id="openweather_api_key" name="openweather_api_key"
                            placeholder="Enter your OpenWeather API key..." autocomplete="off">
@@ -2042,13 +2120,23 @@
             loadChatHistoryFast();
         }
 
-        // Close settings dialog when clicking outside
+        // Close settings dialog when clicking outside or pressing Escape
         document.addEventListener('click', function(event) {
             const dialog = document.getElementById('settingsDialog');
             const settingsContent = document.querySelector('.settings-content');
+            const settingsBtn = document.getElementById('settingsNavBtn');
             
             if (dialog && dialog.classList.contains('active')) {
-                if (!settingsContent.contains(event.target)) {
+                if (!settingsContent.contains(event.target) && !settingsBtn.contains(event.target)) {
+                    closeSettingsDialog();
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const dialog = document.getElementById('settingsDialog');
+                if (dialog && dialog.classList.contains('active')) {
                     closeSettingsDialog();
                 }
             }
