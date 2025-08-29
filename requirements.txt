@@ -30,3 +30,4 @@ openpyxl==3.1.2
 python-magic==0.4.27
 chardet==5.2.0
 google-generativeai
+lxml>=5.0.0
