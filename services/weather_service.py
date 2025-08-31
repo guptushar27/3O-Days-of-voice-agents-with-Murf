@@ -13,8 +13,23 @@ logger = logging.getLogger(__name__)
 class WeatherService:
     def __init__(self, api_key: str = None):
         """Initialize weather service with API key"""
-        self.api_key = api_key or os.environ.get('OPENWEATHER_API_KEY') or os.environ.get('WEATHER_API_KEY')
-        self.base_url = "http://api.openweathermap.org/data/2.5"
+        # Support both WeatherAPI.com and OpenWeatherMap
+        self.weather_api_key = api_key or os.environ.get('WEATHER_API_KEY')
+        self.openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
+
+        # Prefer WeatherAPI.com as it's more reliable
+        self.api_key = self.weather_api_key or self.openweather_api_key
+
+        # Set base URL based on which API key is available
+        if self.weather_api_key:
+            self.base_url = "http://api.weatherapi.com/v1"
+            self.service_type = "weatherapi"
+        elif self.openweather_api_key:
+            self.base_url = "http://api.openweathermap.org/data/2.5"
+            self.service_type = "openweather"
+        else:
+            self.base_url = None
+            self.service_type = None
 
     def get_comprehensive_weather_analysis(self, city: str, date_context: str = None) -> Dict[str, Any]:
         """Get comprehensive weather analysis for a city"""
@@ -22,39 +37,21 @@ class WeatherService:
             if not self.api_key:
                 return {
                     'success': False,
-                    'error': 'Weather API key not configured',
+                    'error': 'Weather API key not configured. Please add WEATHER_API_KEY or OPENWEATHER_API_KEY to your environment.',
                     'current_conditions': {},
                     'forecast': []
                 }
 
-            # Get current weather
-            current_url = f"{self.base_url}/weather"
-            params = {
-                'q': city,
-                'appid': self.api_key,
-                'units': 'metric'
-            }
-
-            response = requests.get(current_url, params=params)
-
-            if response.status_code == 200:
-                data = response.json()
-                return {
-                    'success': True,
-                    'current_conditions': {
-                        'temperature': data['main']['temp'],
-                        'feels_like': data['main']['feels_like'],
-                        'humidity': data['main']['humidity'],
-                        'description': data['weather'][0]['description'],
-                        'city': data['name'],
-                        'country': data['sys']['country']
-                    },
-                    'forecast': []
-                }
+            # Use WeatherAPI.com if available (preferred)
+            if self.service_type == "weatherapi":
+                return self._get_weather_from_weatherapi(city)
+            # Fallback to OpenWeatherMap
+            elif self.service_type == "openweather":
+                return self._get_weather_from_openweather(city)
             else:
                 return {
                     'success': False,
-                    'error': f'Weather API error: {response.status_code}',
+                    'error': 'No valid weather API service configured',
                     'current_conditions': {},
                     'forecast': []
                 }
@@ -66,6 +63,173 @@ class WeatherService:
                 'current_conditions': {},
                 'forecast': []
             }
+
+    def _get_weather_from_weatherapi(self, city: str) -> Dict[str, Any]:
+        """Get weather from WeatherAPI.com"""
+        try:
+            # Clean and validate city name
+            clean_city = self._clean_city_name(city)
+            
+            current_url = f"{self.base_url}/current.json"
+            params = {
+                'key': self.weather_api_key,
+                'q': clean_city,
+                'aqi': 'no'
+            }
+
+            logger.info(f"🌤️ WeatherAPI request for city: '{clean_city}' (original: '{city}')")
+            response = requests.get(current_url, params=params, timeout=10)
+            logger.info(f"🌤️ WeatherAPI response status: {response.status_code}")
+
+            if response.status_code == 200:
+                data = response.json()
+                actual_city = data['location']['name']
+                actual_region = data['location']['region']
+                actual_country = data['location']['country']
+                
+                # Log for debugging
+                logger.info(f"🌤️ Weather data retrieved for: {actual_city}, {actual_region}, {actual_country}")
+                
+                return {
+                    'success': True,
+                    'current_conditions': {
+                        'temperature': data['current']['temp_c'],
+                        'feels_like': data['current']['feelslike_c'],
+                        'humidity': data['current']['humidity'],
+                        'description': data['current']['condition']['text'],
+                        'city': actual_city,
+                        'region': actual_region,
+                        'country': actual_country,
+                        'wind_speed': data['current']['wind_kph'],
+                        'visibility': data['current']['vis_km']
+                    },
+                    'forecast': [],
+                    'service_used': 'WeatherAPI.com'
+                }
+            else:
+                error_msg = f'WeatherAPI.com error: {response.status_code}'
+                if response.status_code == 400:
+                    error_msg += f' - City "{clean_city}" not found. Please check the city name spelling.'
+                elif response.status_code == 401:
+                    error_msg += ' - Invalid API key'
+                elif response.status_code == 403:
+                    error_msg += ' - API key quota exceeded'
+                logger.error(f"🌤️ {error_msg}")
+                return {
+                    'success': False,
+                    'error': error_msg,
+                    'current_conditions': {},
+                    'forecast': []
+                }
+
+        except Exception as e:
+            logger.error(f"🌤️ WeatherAPI request failed: {str(e)}")
+            return {
+                'success': False,
+                'error': f'WeatherAPI.com request failed: {str(e)}',
+                'current_conditions': {},
+                'forecast': []
+            }
+
+    def _get_weather_from_openweather(self, city: str) -> Dict[str, Any]:
+        """Get weather from OpenWeatherMap (fallback)"""
+        try:
+            current_url = f"{self.base_url}/weather"
+            params = {
+                'q': city,
+                'appid': self.openweather_api_key,
+                'units': 'metric'
+            }
+
+            response = requests.get(current_url, params=params, timeout=10)
+
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'success': True,
+                    'current_conditions': {
+                        'temperature': data['main']['temp'],
+                        'feels_like': data['main']['feels_like'],
+                        'humidity': data['main']['humidity'],
+                        'description': data['weather'][0]['description'],
+                        'city': data['name'],
+                        'country': data['sys']['country'],
+                        'wind_speed': data['wind']['speed'],
+                        'visibility': data.get('visibility', 0) / 1000 if data.get('visibility') else 'N/A'
+                    },
+                    'forecast': [],
+                    'service_used': 'OpenWeatherMap'
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': f'OpenWeatherMap error: {response.status_code} - Check your API key and city name',
+                    'current_conditions': {},
+                    'forecast': []
+                }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'OpenWeatherMap request failed: {str(e)}',
+                'current_conditions': {},
+                'forecast': []
+            }
+
+    def _clean_city_name(self, city: str) -> str:
+        """Clean and validate city name for API requests"""
+        if not city:
+            return ""
+        
+        # Remove extra whitespace and normalize
+        city = city.strip()
+        
+        # Handle specific country/state requests
+        city_lower = city.lower()
+        if 'delhi' in city_lower and 'india' in city_lower:
+            return "Delhi,India"
+        elif 'mumbai' in city_lower and 'india' in city_lower:
+            return "Mumbai,India"
+        elif 'bangalore' in city_lower and 'india' in city_lower:
+            return "Bangalore,India"
+        
+        # Handle common misspellings and variations
+        city_corrections = {
+            'New Yourk': 'New York',
+            'Dellhi': 'Delhi,India',
+            'Mumbay': 'Mumbai,India',
+            'Bangalor': 'Bangalore,India',
+            'Chenai': 'Chennai,India',
+            'Japur': 'Jaipur,India',
+            'Calcuta': 'Kolkata,India',
+            'Hydrabad': 'Hyderabad,India',
+            'Poon': 'Pune,India',
+            'Ahmadabad': 'Ahmedabad,India'
+        }
+        
+        # Check for corrections first
+        city_title = city.title()
+        if city_title in city_corrections:
+            city = city_corrections[city_title]
+            logger.info(f"🌤️ Corrected city name to: {city}")
+            return city
+        
+        # For Indian cities, default to India if no country specified
+        indian_cities = ['delhi', 'mumbai', 'bangalore', 'kolkata', 'chennai', 'hyderabad', 'pune', 'ahmedabad', 'jaipur', 'lucknow', 'kanpur', 'nagpur', 'indore', 'bhopal', 'visakhapatnam', 'patna', 'vadodara', 'ghaziabad', 'ludhiana', 'agra']
+        
+        if city_lower in indian_cities and 'india' not in city_lower:
+            return f"{city.title()},India"
+        
+        # Remove common words that shouldn't be part of city name
+        unwanted_words = ['weather', 'temperature', 'forecast', 'city', 'and']
+        words = city.split()
+        cleaned_words = []
+        
+        for word in words:
+            if word.lower() not in unwanted_words:
+                cleaned_words.append(word)
+        
+        return ','.join(cleaned_words) if ',' in city else ' '.join(cleaned_words)
 
     def format_weather_analysis_response(self, weather_data: Dict[str, Any], persona: str = None) -> str:
         """Format weather analysis response based on persona"""
@@ -81,11 +245,21 @@ class WeatherService:
         humidity = conditions.get('humidity', 'N/A')
         description = conditions.get('description', 'N/A')
         city = conditions.get('city', 'Unknown')
+        region = conditions.get('region', '')
+        country = conditions.get('country', '')
+
+        # Create location string with proper formatting
+        location_parts = [city]
+        if region and region != city:
+            location_parts.append(region)
+        if country:
+            location_parts.append(country)
+        full_location = ', '.join(location_parts)
 
         if persona == 'pirate':
-            return f"Arrr! The weather at {city} be {description} with a temperature of {temp}°C (feels like {feels_like}°C), humidity at {humidity}%. The winds be tellin' tales of the sea, matey!"
+            return f"Arrr! The weather at {full_location} be {description} with a temperature of {temp}°C (feels like {feels_like}°C), humidity at {humidity}%. The winds be tellin' tales of the sea, matey!"
         else:
-            return f"The weather in {city} is {description} with a temperature of {temp}°C (feels like {feels_like}°C) and humidity at {humidity}%."
+            return f"The weather in {full_location} is {description} with a temperature of {temp}°C (feels like {feels_like}°C) and humidity at {humidity}%."
 
     def is_configured(self) -> bool:
         """Check if the service is properly configured"""
@@ -122,27 +296,172 @@ class WeatherService:
             logger.error(f"Geocoding error: {e}")
             return None
 
-    def get_current_weather(self, lat: float, lon: float) -> Dict[str, Any]:
-        """Get current weather conditions"""
+    def get_current_weather(self, city: str) -> Dict[str, Any]:
+        """Get current weather for a city with enhanced error handling and fallback"""
         try:
-            url = f"{self.base_url}/weather"
+            logger.info(f"🌤️ Getting weather for: {city}")
+
+            if not self.api_key:
+                logger.warning("Weather API key not configured")
+                return {
+                    'success': False,
+                    'error': 'Weather API key not configured',
+                    'fallback_response': f"I'd love to help you check the weather in {city}, but I need a weather API key to be configured. You can set this up in the API settings panel or add WEATHER_API_KEY to your environment variables."
+                }
+
+            # Clean and format city name
+            city = city.strip().title()
+
+            # Try WeatherAPI.com first, then OpenWeatherMap as fallback
+            weather_data = self._try_weatherapi_com(city)
+
+            if not weather_data['success'] and self._has_openweather_fallback():
+                logger.info("🌤️ Trying OpenWeatherMap as fallback")
+                weather_data = self._try_openweathermap(city)
+
+            return weather_data
+
+        except Exception as e:
+            logger.error(f"Weather service error: {str(e)}")
+            return {
+                'success': False,
+                'error': f'Weather service error: {str(e)}',
+                'fallback_response': f"I apologize, but I'm having trouble getting weather information for {city} right now. The weather service might be temporarily unavailable. Please try again in a moment."
+            }
+
+    def _try_weatherapi_com(self, city: str) -> Dict[str, Any]:
+        """Try WeatherAPI.com for weather data"""
+        try:
+            # Construct API URL for WeatherAPI.com
+            url = f"{self.base_url}/current.json"
             params = {
-                'lat': lat,
-                'lon': lon,
-                'appid': self.api_key,
+                'key': self.api_key,
+                'q': city,
+                'aqi': 'yes'  # Include air quality data
+            }
+
+            logger.info(f"🌤️ Making WeatherAPI.com request to: {url}")
+            logger.info(f"🌤️ Request params: q={city}, aqi=yes")
+
+            response = requests.get(url, params=params, timeout=10)
+            logger.info(f"🌤️ WeatherAPI.com response status: {response.status_code}")
+
+            if response.status_code == 200:
+                data = response.json()
+                logger.info("🌤️ Successfully fetched weather data from WeatherAPI.com")
+
+                return {
+                    'success': True,
+                    'location': {
+                        'name': data['location']['name'],
+                        'region': data['location']['region'],
+                        'country': data['location']['country'],
+                        'localtime': data['location']['localtime']
+                    },
+                    'current': {
+                        'temperature': data['current']['temp_c'],
+                        'temperature_f': data['current']['temp_f'],
+                        'condition': data['current']['condition']['text'],
+                        'humidity': data['current']['humidity'],
+                        'wind_speed': data['current']['wind_kph'],
+                        'wind_direction': data['current']['wind_dir'],
+                        'feels_like': data['current']['feelslike_c'],
+                        'uv_index': data['current']['uv'],
+                        'visibility': data['current']['vis_km']
+                    },
+                    'air_quality': data.get('current', {}).get('air_quality', {}),
+                    'api_used': 'WeatherAPI.com'
+                }
+            else:
+                logger.error(f"WeatherAPI.com error: {response.status_code} - {response.text}")
+                return {
+                    'success': False,
+                    'error': f'WeatherAPI.com error: {response.status_code}',
+                    'details': response.text[:200]
+                }
+
+        except requests.exceptions.Timeout:
+            logger.error("WeatherAPI.com request timed out")
+            return {
+                'success': False,
+                'error': 'WeatherAPI.com service timed out'
+            }
+        except requests.exceptions.ConnectionError:
+            logger.error("WeatherAPI.com connection error")
+            return {
+                'success': False,
+                'error': 'Unable to connect to WeatherAPI.com'
+            }
+        except Exception as e:
+            logger.error(f"WeatherAPI.com service error: {str(e)}")
+            return {
+                'success': False,
+                'error': f'WeatherAPI.com service error: {str(e)}'
+            }
+
+    def _has_openweather_fallback(self) -> bool:
+        """Check if OpenWeatherMap fallback is available"""
+        # Check if we have an OpenWeatherMap API key as fallback
+        openweather_key = os.environ.get('OPENWEATHER_API_KEY')
+        return openweather_key is not None
+
+    def _try_openweathermap(self, city: str) -> Dict[str, Any]:
+        """Try OpenWeatherMap as fallback"""
+        try:
+            openweather_key = os.environ.get('OPENWEATHER_API_KEY')
+            if not openweather_key:
+                return {
+                    'success': False,
+                    'error': 'OpenWeatherMap fallback not configured'
+                }
+
+            url = "http://api.openweathermap.org/data/2.5/weather"
+            params = {
+                'q': city,
+                'appid': openweather_key,
                 'units': 'metric'
             }
 
             response = requests.get(url, params=params, timeout=10)
 
             if response.status_code == 200:
-                return response.json()
+                data = response.json()
+                logger.info("🌤️ Successfully fetched weather data from OpenWeatherMap")
+
+                return {
+                    'success': True,
+                    'location': {
+                        'name': data['name'],
+                        'region': '',
+                        'country': data['sys']['country'],
+                        'localtime': ''
+                    },
+                    'current': {
+                        'temperature': data['main']['temp'],
+                        'temperature_f': (data['main']['temp'] * 9/5) + 32,
+                        'condition': data['weather'][0]['description'].title(),
+                        'humidity': data['main']['humidity'],
+                        'wind_speed': data.get('wind', {}).get('speed', 0) * 3.6,  # Convert m/s to km/h
+                        'wind_direction': '',
+                        'feels_like': data['main']['feels_like'],
+                        'uv_index': 0,  # Not available in basic OpenWeather
+                        'visibility': data.get('visibility', 0) / 1000  # Convert m to km
+                    },
+                    'air_quality': {},
+                    'api_used': 'OpenWeatherMap (Fallback)'
+                }
             else:
-                logger.error(f"Current weather API error: {response.status_code}")
-                return {}
+                return {
+                    'success': False,
+                    'error': f'OpenWeatherMap error: {response.status_code}'
+                }
+
         except Exception as e:
-            logger.error(f"Current weather error: {e}")
-            return {}
+            logger.error(f"OpenWeatherMap fallback error: {str(e)}")
+            return {
+                'success': False,
+                'error': f'OpenWeatherMap fallback error: {str(e)}'
+            }
 
     def get_hourly_forecast(self, lat: float, lon: float) -> Dict[str, Any]:
         """Get hourly weather forecast"""
@@ -216,7 +535,7 @@ class WeatherService:
                 }
 
             # Get current weather
-            current = self.get_current_weather(coords['lat'], coords['lon'])
+            current = self.get_current_weather(coords['name'])
             if not current:
                 return {
                     'success': False,
@@ -232,15 +551,15 @@ class WeatherService:
                     'coordinates': f"{coords['lat']:.2f}, {coords['lon']:.2f}"
                 },
                 'current': {
-                    'temperature': round(current['main']['temp']),
-                    'feels_like': round(current['main']['feels_like']),
-                    'description': current['weather'][0]['description'].title(),
-                    'humidity': current['main']['humidity'],
-                    'pressure': current['main']['pressure'],
-                    'visibility': current.get('visibility', 0) / 1000,  # Convert to km
-                    'wind_speed': current['wind']['speed'],
-                    'wind_direction': current['wind'].get('deg', 0),
-                    'uv_index': current.get('uvi', 'N/A'),
+                    'temperature': round(current['current']['temperature']),
+                    'feels_like': round(current['current']['feels_like']),
+                    'description': current['current']['condition'],
+                    'humidity': current['current']['humidity'],
+                    'pressure': 0, # Not available in current response structure for weatherapi
+                    'visibility': current['current']['visibility'],
+                    'wind_speed': current['current']['wind_speed'],
+                    'wind_direction': current['current']['wind_direction'],
+                    'uv_index': current['current']['uv_index'],
                     'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 },
                 'report_type': report_type
@@ -326,28 +645,28 @@ class WeatherService:
 
         if persona == 'pirate':
             response = f"Ahoy! Here be the weather report for {location['city']}"
-            if location['state']:
+            if location.get('state'):
                 response += f", {location['state']}"
-            if location['country']:
+            if location.get('country'):
                 response += f" in {location['country']}"
             response += "!\n\n"
 
             response += f"🌡️ Current conditions: {current['temperature']}°C, feelin' like {current['feels_like']}°C\n"
             response += f"☁️ Sky conditions: {current['description']}\n"
-            response += f"💨 Wind blowin' at {current['wind_speed']} m/s\n"
+            response += f"💨 Wind blowin' at {current['wind_speed']} kph\n"
             response += f"💧 Humidity: {current['humidity']}%\n\n"
 
         else:
             response = f"Weather Report for {location['city']}"
-            if location['state']:
+            if location.get('state'):
                 response += f", {location['state']}"
-            if location['country']:
+            if location.get('country'):
                 response += f", {location['country']}"
             response += "\n\n"
 
             response += f"🌡️ Current: {current['temperature']}°C (feels like {current['feels_like']}°C)\n"
             response += f"☁️ Conditions: {current['description']}\n"
-            response += f"💨 Wind: {current['wind_speed']} m/s\n"
+            response += f"💨 Wind: {current['wind_speed']} kph\n"
             response += f"💧 Humidity: {current['humidity']}%\n"
             response += f"👁️ Visibility: {current['visibility']} km\n\n"
 
