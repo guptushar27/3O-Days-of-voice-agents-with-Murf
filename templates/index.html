@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e1b4b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="VoxAura AI - Advanced Voice Assistant powered by cutting-edge AI technology">
     <title>VoxAura AI - Voice Assistant</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="apple-touch-icon" href="/static/favicon.svg">
+    <link rel="manifest" href="/static/manifest.json">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -585,6 +591,16 @@
                 padding: 10px 15px;
             }
 
+            .murf-branding {
+                padding: 6px 15px;
+                height: 35px;
+            }
+
+            .murf-link {
+                font-size: 0.75rem;
+                padding: 3px 10px;
+            }
+
             .persona-selector {
                 display: none;
             }
@@ -613,6 +629,7 @@
             .input-container {
                 padding: 8px 10px;
                 gap: 8px;
+                height: 70px;
             }
 
             .voice-button, .attach-button {
@@ -626,12 +643,99 @@
                 height: 40px;
                 font-size: 1rem;
             }
+
+            .murf-branding {
+                padding: 4px 10px;
+                height: 30px;
+            }
+
+            .murf-link {
+                font-size: 0.7rem;
+                padding: 2px 8px;
+                gap: 4px;
+            }
+
+            .chat-container {
+                height: calc(100vh - 170px);
+            }
+        }
+
+        /* Tablet responsiveness */
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .input-container {
+                height: 75px;
+                padding: 12px 18px;
+            }
+
+            .murf-branding {
+                height: 38px;
+                padding: 7px 18px;
+            }
+
+            .murf-link {
+                font-size: 0.78rem;
+            }
+
+            .chat-container {
+                height: calc(100vh - 183px);
+            }
+        }
+
+        /* Desktop enhancements */
+        @media (min-width: 1025px) {
+            .murf-link:hover {
+                background: rgba(79, 172, 254, 0.15);
+                box-shadow: 0 2px 8px rgba(79, 172, 254, 0.2);
+            }
         }
 
         /* Ensure sidebar toggle is always visible and fixed */
         @media (min-width: 769px) {
             .main-content.shifted {
                 margin-left: 300px;
+            }
+        }
+
+        /* Landscape orientation adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .header {
+                padding: 10px 60px 10px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .input-container {
+                height: 60px;
+                padding: 8px 15px;
+            }
+
+            .murf-branding {
+                height: 30px;
+                padding: 4px 15px;
+            }
+
+            .chat-container {
+                height: calc(100vh - 160px);
+            }
+
+            .voice-button, .attach-button {
+                width: 45px;
+                height: 45px;
+            }
+
+            .send-button {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* High DPI screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .murf-link {
+                font-weight: 500;
+                letter-spacing: 0.3px;
             }
         }
 
@@ -712,7 +816,7 @@
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 150px);
+            height: calc(100vh - 190px);
         }
 
         .chat-messages {
@@ -855,6 +959,52 @@
             height: 80px;
         }
 
+        /* Murf Branding */
+        .murf-branding {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+        }
+
+        .murf-link {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            padding: 4px 12px;
+            border-radius: 15px;
+            border: 1px solid transparent;
+        }
+
+        .murf-link:hover {
+            color: #4facfe;
+            text-decoration: none;
+            background: rgba(79, 172, 254, 0.1);
+            border-color: rgba(79, 172, 254, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .murf-link i {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .murf-logo {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: transparent;
+        }
+
         .voice-button {
             width: 50px;
             height: 50px;
@@ -876,9 +1026,31 @@
             box-shadow: 0 5px 20px rgba(255, 119, 198, 0.4);
         }
 
+        .voice-button:active {
+            transform: scale(0.95);
+        }
+
         .voice-button.recording {
             animation: pulse 1s infinite;
             background: linear-gradient(45deg, #ff4757, #ff3838);
+        }
+
+        /* Touch-friendly interactions */
+        @media (hover: none) and (pointer: coarse) {
+            .voice-button, .attach-button, .send-button {
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .murf-link {
+                min-height: 32px;
+                padding: 6px 14px;
+            }
+
+            .sidebar-toggle {
+                min-width: 44px;
+                min-height: 44px;
+            }
         }
 
         .text-input {
@@ -1111,6 +1283,17 @@
                            placeholder="Enter your OpenWeather API key..." autocomplete="off">
                 </div>
 
+                <div class="form-group">
+                    <label for="weather_api_key">
+                        <i class="fas fa-cloud"></i> WeatherAPI.com API Key (Weather)
+                        <a href="https://www.weatherapi.com/" target="_blank" style="color: #4facfe; text-decoration: none; margin-left: 10px;">
+                            <i class="fas fa-external-link-alt"></i> Get API Key
+                        </a>
+                    </label>
+                    <input type="password" id="weather_api_key" name="weather_api_key"
+                           placeholder="Enter your WeatherAPI.com API key..." autocomplete="off">
+                </div>
+
                 <div class="settings-buttons">
                     <button type="button" class="settings-btn save-settings-btn" onclick="saveApiKeys()">
                         <i class="fas fa-save"></i> Save Keys
@@ -1174,6 +1357,18 @@
             <button class="send-button" id="sendBtn" onclick="sendMessage()">
                 <i class="fas fa-paper-plane"></i>
             </button>
+        </div>
+
+        <!-- Murf Branding -->
+        <div class="murf-branding">
+            <a href="https://murf.ai/api/docs/introduction/overview" target="_blank" class="murf-link">
+                <img src="https://images-ext-1.discordapp.net/external/MN4QJGKokptsUOhncbsnlhbNKIJc5W9THqpd6PMBcOo/%3Fs%3D280%26v%3D4/https/avatars.githubusercontent.com/u/83059529?format=webp&width=420&height=420" 
+                     alt="Murf Logo" 
+                     class="murf-logo"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <i class="fas fa-volume-up" style="display: none;"></i>
+                Powered by Murf
+            </a>
         </div>
     </div>
 
@@ -1311,10 +1506,12 @@
         function checkApiConfiguration() {
             const hasGeminiKey = currentApiKeys.gemini_api_key && currentApiKeys.gemini_api_key.trim();
             const hasAssemblyAiKey = currentApiKeys.assemblyai_api_key && currentApiKeys.assemblyai_api_key.trim();
+            const hasOpenWeatherKey = currentApiKeys.openweather_api_key && currentApiKeys.openweather_api_key.trim();
+            const hasWeatherAPIKey = currentApiKeys.weather_api_key && currentApiKeys.weather_api_key.trim();
 
             const apiWarning = document.getElementById('apiWarning');
             if (apiWarning) {
-                if (!hasGeminiKey || !hasAssemblyAiKey) {
+                if (!hasGeminiKey || !hasAssemblyAiKey || (!hasOpenWeatherKey && !hasWeatherAPIKey)) {
                     apiWarning.style.display = 'block';
                 } else {
                     apiWarning.style.display = 'none';
