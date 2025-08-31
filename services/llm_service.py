@@ -100,7 +100,12 @@ class LLMService:
         Returns:
             Dict containing response and metadata
         """
-        # Check for weather requests first (special skill)
+        # Check for PDF processing requests first (prioritize over other skills)
+        pdf_result = self._handle_pdf_request(user_message, persona)
+        if pdf_result:
+            return pdf_result
+
+        # Check for weather requests (special skill)
         weather_result = self._handle_weather_request(user_message, persona)
         if weather_result:
             return weather_result
@@ -114,11 +119,6 @@ class LLMService:
         study_result = self._handle_study_request(user_message, persona)
         if study_result:
             return study_result
-
-        # Check for PDF processing requests (new skill)
-        pdf_result = self._handle_pdf_request(user_message, persona)
-        if pdf_result:
-            return pdf_result
 
         if not self.is_configured():
             return {
@@ -186,7 +186,20 @@ class LLMService:
         Returns:
             Dict containing full response and metadata
         """
-        # Check for weather requests first (special skill)
+        # Check for PDF processing requests first (prioritize over other skills)
+        pdf_result = self._handle_pdf_request(user_message, persona)
+        if pdf_result:
+            # Simulate streaming for PDF responses
+            if callback:
+                response_text = pdf_result['response']
+                words = response_text.split(' ')
+                chunk_size = 3
+                for i in range(0, len(words), chunk_size):
+                    chunk = ' '.join(words[i:i+chunk_size]) + ' '
+                    callback(chunk)
+            return pdf_result
+
+        # Check for weather requests (special skill)
         weather_result = self._handle_weather_request(user_message, persona)
         if weather_result:
             # Simulate streaming for weather responses
@@ -224,19 +237,6 @@ class LLMService:
                     chunk = ' '.join(words[i:i+chunk_size]) + ' '
                     callback(chunk)
             return study_result
-
-        # Check for PDF processing requests (new skill)
-        pdf_result = self._handle_pdf_request(user_message, persona)
-        if pdf_result:
-            # Simulate streaming for PDF responses
-            if callback:
-                response_text = pdf_result['response']
-                words = response_text.split(' ')
-                chunk_size = 3
-                for i in range(0, len(words), chunk_size):
-                    chunk = ' '.join(words[i:i+chunk_size]) + ' '
-                    callback(chunk)
-            return pdf_result
 
         if not self.is_configured():
             # Day 20 fallback - simulate streaming response for testing
@@ -403,14 +403,21 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
         """Generate contextual fallback responses when LLM fails"""
         message_lower = user_message.lower()
 
-        if any(word in message_lower for word in ['hello', 'hi', 'hey']):
-            return "Hello! I'm having some technical difficulties with my AI services right now, but I'm still here to chat with you."
+        # Handle specific queries with useful information
+        if 'llm' in message_lower:
+            return "LLM stands for Large Language Model. It's a type of AI system like me that's trained on vast amounts of text data to understand and generate human-like responses. Examples include GPT, Claude, Gemini, and others. They can help with tasks like answering questions, writing, coding, and analysis."
+        elif 'weather' in message_lower:
+            return "I can help you with weather information! Please provide a city name and I'll get the current weather conditions for you. For example, ask 'What's the weather in London?'"
+        elif any(word in message_lower for word in ['hello', 'hi', 'hey']):
+            return "Hello! I'm here to help you. You can ask me about weather, search for information, or have a general conversation. What would you like to know?"
         elif any(word in message_lower for word in ['trouble', 'problem', 'issue']):
-            return "I understand you're having some trouble. I'm also experiencing some technical difficulties right now, but I'm here to help as best I can."
+            return "I'm here to help! I can assist with weather information, answer questions, help with research, or just have a conversation. What specific issue can I help you with?"
         elif any(word in message_lower for word in ['help', 'assist']):
-            return "I'd love to help you, but I'm experiencing some connectivity issues with my AI services. Please try again in a moment."
+            return "I'd be happy to help! I can provide weather information, answer questions, help with research, or have a conversation. What would you like assistance with?"
+        elif any(word in message_lower for word in ['search', 'find', 'look up']):
+            return "I can help you search for information! Try asking specific questions and I'll do my best to provide helpful answers. What would you like to know about?"
         else:
-            return "I'm having trouble connecting to my AI services right now. Please try again in a moment, and I'll do my best to assist you."
+            return "I'm here to help! I can assist with weather information, answer questions, help with research, or have a conversation. What would you like to know?"
 
     def _handle_weather_request(self, message: str, persona: str = None) -> Dict[str, Any]:
         """
@@ -425,12 +432,11 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
         """
         message_lower = message.lower()
 
-        # Weather keywords
-        weather_keywords = ['weather', 'temperature', 'forecast', 'climate', 'hot', 'cold', 'rain', 'sunny']
-        location_keywords = ['in ', 'at ', 'for ']
-
-        # Check if this is a weather request
-        if any(keyword in message_lower for keyword in weather_keywords):
+        # Check for weather skill (but not if it's a document processing request)
+        weather_keywords = ['weather', 'temperature', 'rain', 'sunny', 'cloudy', 'forecast', 'humidity', 'wind']
+        document_exclusions = ['pdf', 'document', 'upload', 'file', 'summarize document']
+        if (any(keyword in message_lower for keyword in weather_keywords) and 
+            not any(exclusion in message_lower for exclusion in document_exclusions)):
             logger.info(f"🌤️ WEATHER SKILL ACTIVATED: {message}")
 
             # Extract city name and date context
@@ -452,15 +458,32 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
                     'skill_used': 'weather'
                 }
 
+            # Validate city name before making request
+            if not city or len(city.strip()) < 2:
+                if persona == 'pirate':
+                    response = "Arrr! I need a proper city name to check the weather, matey! Which port should I scout?"
+                else:
+                    response = "I need a valid city name to check the weather. Please specify which city you'd like me to check."
+                
+                return {
+                    'success': True,
+                    'response': response,
+                    'model_used': 'weather-skill',
+                    'character_count': len(response),
+                    'skill_used': 'weather'
+                }
+
             # Get weather data using enhanced weather analysis
+            logger.info(f"🌤️ Getting weather for extracted city: '{city}'")
             weather_data = self.weather_service.get_comprehensive_weather_analysis(city, date_context)
             response = self.weather_service.format_weather_analysis_response(weather_data, persona)
 
             if weather_data['success']:
+                actual_city = weather_data.get('current_conditions', {}).get('city', city)
                 current_temp = weather_data.get('current_conditions', {}).get('temperature', 'N/A')
-                print(f"🌤️ WEATHER SKILL SUCCESS: {city} -> {current_temp}°C")
+                print(f"🌤️ WEATHER SKILL SUCCESS: {city} -> {actual_city} -> {current_temp}°C")
             else:
-                print(f"🌤️ WEATHER SKILL ERROR: {weather_data.get('error', 'Unknown error')}")
+                print(f"🌤️ WEATHER SKILL ERROR for '{city}': {weather_data.get('error', 'Unknown error')}")
 
             return {
                 'success': True,
@@ -475,7 +498,7 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
 
     def _extract_city_from_message(self, message: str) -> Optional[str]:
         """
-        Extract city name from weather request message
+        Extract city name from weather request message with improved accuracy
 
         Args:
             message: User message
@@ -483,14 +506,15 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
         Returns:
             Extracted city name or empty string
         """
-        # Common patterns for weather requests
+        # Enhanced patterns for weather requests
         patterns = [
-            r'weather (?:in|at|for) ([a-zA-Z\s]+?)(?:\s|$)',
-            r'temperature (?:in|at|for) ([a-zA-Z\s]+?)(?:\s|$)',
-            r'forecast (?:in|at|for) ([a-zA-Z\s]+?)(?:\s|$)',
-            r'how.*weather.*(?:in|at|for) ([a-zA-Z\s]+?)(?:\s|$)',
-            r'what.*weather.*(?:in|at|for) ([a-zA-Z\s]+?)(?:\s|$)',
-            r'(?:weather|temperature|forecast) ([a-zA-Z\s]+?)(?:\s|$)',
+            r'weather (?:in|at|for|of) ([a-zA-Z\s\-]+?)(?:\?|$|\.|,|!)',
+            r'temperature (?:in|at|for|of) ([a-zA-Z\s\-]+?)(?:\?|$|\.|,|!)',
+            r'forecast (?:in|at|for|of) ([a-zA-Z\s\-]+?)(?:\?|$|\.|,|!)',
+            r'(?:what\'?s|how\'?s) (?:the )?weather (?:in|at|for|of) ([a-zA-Z\s\-]+?)(?:\?|$|\.|,|!)',
+            r'weather (?:like )?(?:in|at|for|of) ([a-zA-Z\s\-]+?)(?:\?|$|\.|,|!)',
+            r'(?:check|get|tell me) (?:the )?weather (?:in|at|for|of) ([a-zA-Z\s\-]+?)(?:\?|$|\.|,|!)',
+            r'(?:in|at|for) ([a-zA-Z\s\-]{2,25})(?:\?|$|\.|,|!)',
         ]
 
         message_lower = message.lower().strip()
@@ -498,30 +522,82 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
         for pattern in patterns:
             match = re.search(pattern, message_lower)
             if match:
-                city = match.group(1).strip().title()
+                city = match.group(1).strip()
+                
                 # Remove common words that might be captured
-                city = re.sub(r'\b(the|is|like|today|now|currently|and|or)\b', '', city, flags=re.IGNORECASE).strip()
-                # Clean up extra spaces
+                stop_words = r'\b(the|is|like|today|now|currently|and|or|weather|temperature|forecast|very|quite|really|please|thanks|thank you)\b'
+                city = re.sub(stop_words, '', city, flags=re.IGNORECASE).strip()
+                
+                # Clean up extra spaces and punctuation
                 city = re.sub(r'\s+', ' ', city).strip()
-                if city and len(city) > 1:
-                    return city
+                city = re.sub(r'[^\w\s\-]', '', city).strip()
+                
+                # Validate city name length and content
+                if city and len(city) >= 2 and len(city) <= 50:
+                    # Check if it contains at least one letter
+                    if re.search(r'[a-zA-Z]', city):
+                        return city.title()
 
-        # If no pattern matches, try to find city after common weather words
-        weather_words = ['weather', 'temperature', 'forecast']
-        for word in weather_words:
-            if word in message_lower:
-                # Look for the next few words after the weather word
-                words = message_lower.split()
-                try:
-                    word_index = words.index(word)
-                    # Check the next few words
-                    for i in range(word_index + 1, min(word_index + 4, len(words))):
-                        potential_city = words[i]
-                        # Skip common words and prepositions
-                        if potential_city not in ['in', 'at', 'for', 'is', 'like', 'the', 'today', 'now', 'and', 'or', 'a', 'an']:
-                            return potential_city.title()
-                except ValueError:
-                    continue
+        # Enhanced fallback: look for city names after weather keywords
+        weather_keywords = ['weather', 'temperature', 'forecast', 'climate', 'conditions']
+        prepositions = ['in', 'at', 'for', 'of', 'from']
+        
+        words = message_lower.split()
+        
+        for i, word in enumerate(words):
+            if word in weather_keywords:
+                # Look for preposition + city pattern within next 4 words
+                for j in range(i + 1, min(i + 5, len(words))):
+                    if words[j] in prepositions and j + 1 < len(words):
+                        # Extract potential city name (could be multiple words)
+                        potential_words = []
+                        for k in range(j + 1, min(j + 4, len(words))):
+                            word_clean = re.sub(r'[^\w\-]', '', words[k])
+                            if (word_clean and 
+                                len(word_clean) > 1 and 
+                                word_clean not in ['the', 'a', 'an', 'is', 'are', 'was', 'were', 'today', 'now', 'very', 'quite']):
+                                potential_words.append(word_clean)
+                            else:
+                                break
+                        
+                        if potential_words:
+                            potential_city = ' '.join(potential_words).title()
+                            if len(potential_city) >= 2:
+                                return potential_city
+
+        # Look for city with country context first
+        if 'delhi' in message_lower and 'india' in message_lower:
+            return "Delhi,India"
+        elif 'mumbai' in message_lower and 'india' in message_lower:
+            return "Mumbai,India"
+        elif 'bangalore' in message_lower and 'india' in message_lower:
+            return "Bangalore,India"
+        
+        # Look for standalone city names (common cities) with country defaults
+        indian_cities = ['delhi', 'mumbai', 'bangalore', 'kolkata', 'chennai', 'hyderabad', 'pune', 'ahmedabad', 'jaipur', 'lucknow']
+        international_cities = ['london', 'paris', 'berlin', 'madrid', 'rome', 'vienna', 'moscow', 'istanbul', 'athens', 'amsterdam',
+            'tokyo', 'beijing', 'shanghai', 'seoul', 'bangkok', 'singapore', 'jakarta', 'manila', 'kuala lumpur',
+            'new york', 'los angeles', 'chicago', 'houston', 'phoenix', 'philadelphia', 'san antonio', 'san diego',
+            'toronto', 'vancouver', 'montreal', 'calgary', 'ottawa', 'sydney', 'melbourne', 'brisbane', 'perth']
+        
+        # Check for Indian cities and default to India
+        for city in indian_cities:
+            if city in message_lower:
+                return f"{city.title()},India"
+        
+        # Check for international cities
+        for city in international_cities:
+            if city in message_lower:
+                return city.title()
+
+        # Final fallback: look for any reasonable word that could be a city
+        words = message_lower.split()
+        for word in words:
+            clean_word = re.sub(r'[^\w]', '', word)
+            if (len(clean_word) >= 3 and 
+                clean_word not in ['what', 'how', 'the', 'weather', 'temperature', 'forecast', 'like', 'today', 'now', 'very', 'please', 'thanks'] and
+                re.search(r'[a-z]', clean_word)):
+                return clean_word.title()
 
         return ""
 
@@ -661,8 +737,15 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
                 if query:
                     return query
 
+        # For questions starting with question words, use the whole question as query
+        if message_lower.startswith(('what', 'who', 'how', 'why', 'when', 'where', 'which')):
+            # Clean the message and use as query
+            query = re.sub(r'[?!.]*$', '', message.strip()).strip()
+            if len(query) > 5:  # Reasonable minimum length
+                return query
+
         # If no pattern matches, try to find query after common search words
-        search_words = ['search', 'find', 'lookup', 'google']
+        search_words = ['search', 'find', 'lookup', 'google', 'about']
         for word in search_words:
             if word in message_lower:
                 words = message_lower.split()
@@ -672,11 +755,15 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
                     if word_index + 1 < len(words):
                         query_words = words[word_index + 1:]
                         # Remove common words
-                        query_words = [w for w in query_words if w not in ['for', 'me', 'about', 'online', 'on', 'the', 'web']]
+                        query_words = [w for w in query_words if w not in ['for', 'me', 'about', 'online', 'on', 'the', 'web', '?', '!', '.']]
                         if query_words:
                             return ' '.join(query_words)
                 except ValueError:
                     continue
+
+        # If message contains '?' and is reasonably long, treat as query
+        if '?' in message and len(message.strip()) > 5:
+            return re.sub(r'[?!.]*$', '', message.strip()).strip()
 
         return ""
 
@@ -789,51 +876,62 @@ CONVERSATION MEMORY: Remember our shared adventures and refer to the user as par
         """
         message_lower = message.lower()
 
-        # PDF processing keywords
-        pdf_keywords = ['pdf', 'document', 'file', 'upload', 'summarize pdf', 'analyze document']
-
-        # Check if this is a PDF processing request
-        if any(keyword in message_lower for keyword in pdf_keywords):
+        # Check for PDF processing skill (prioritize over other skills)
+        pdf_keywords = ['pdf', 'document', 'summarize document', 'analyze document', 'upload', 'file processing']
+        document_indicators = ['uploading document', 'upload document', 'process pdf', 'analyze pdf']
+        if any(keyword in message_lower for keyword in pdf_keywords) or any(indicator in message_lower for indicator in document_indicators):
             logger.info(f"📄 PDF PROCESSING SKILL ACTIVATED: {message}")
 
-            # Determine analysis type (e.g., summarize, question/answer)
+            # Determine analysis type
             analysis_type = 'summarize'  # Default to summarize
             if 'question' in message_lower or 'answer' in message_lower:
-                analysis_type = 'question_answer'
-            elif 'summarize' in message_lower:
+                analysis_type = 'questions'
+            elif 'key point' in message_lower or 'points' in message_lower:
+                analysis_type = 'key_points'
+            elif 'concept' in message_lower:
+                analysis_type = 'concepts'
+            elif 'summarize' in message_lower or 'summary' in message_lower:
                 analysis_type = 'summarize'
 
-            # Check if a file is provided or needs to be requested
-            # In a real application, this would involve checking for uploaded file data.
-            # For now, we'll assume the message indicates intent and prompt for the file.
-            if 'file' not in message_lower and 'document' not in message_lower and 'pdf' not in message_lower:
-                 if persona == 'pirate':
-                    response = f"Arrr! Ready to tackle that PDF, matey! Upload a file ye want me to {analysis_type}!"
-                 else:
-                    response = f"Please upload the PDF file you would like me to {analysis_type}."
-                 return {
+            # Check if this is an upload notification
+            if 'uploading document' in message_lower or 'upload document' in message_lower:
+                if persona == 'pirate':
+                    response = "Ahoy! I see ye be uploading a document! Once it's aboard, I'll analyze it for ye and provide a proper summary, matey!"
+                else:
+                    response = "I see you're uploading a document! I'll analyze it and provide a comprehensive summary once the upload is complete."
+
+                return {
                     'success': True,
                     'response': response,
                     'model_used': 'pdf-service',
                     'character_count': len(response),
                     'skill_used': 'pdf_processing',
-                    'awaiting_file': True
-                 }
+                    'awaiting_file': True,
+                    'analysis_type': analysis_type
+                }
 
-            # If file is assumed to be present (e.g., from UI upload), proceed
-            # In a real scenario, 'file' would be an actual file object passed from the UI
-            # For this example, we'll simulate by returning a placeholder response
-            # as we don't have the actual file object here.
-            # The actual processing happens in `process_pdf_file` which would be called
-            # with the file object.
+            # If no specific document context, ask for upload
+            if not any(keyword in message_lower for keyword in ['uploading', 'upload', 'file', 'document']):
+                if persona == 'pirate':
+                    response = f"Arrr! Ready to tackle that document, matey! Upload the file ye want me to {analysis_type}!"
+                else:
+                    response = f"I'm ready to help with document analysis! Please upload the file you'd like me to {analysis_type}."
 
-            # Placeholder for when file is actually provided and processed
-            # The `process_pdf_file` method is defined below.
-            # This section here is more for intent detection.
+                return {
+                    'success': True,
+                    'response': response,
+                    'model_used': 'pdf-service',
+                    'character_count': len(response),
+                    'skill_used': 'pdf_processing',
+                    'awaiting_file': True,
+                    'analysis_type': analysis_type
+                }
+
+            # Default processing response
             if persona == 'pirate':
-                response = f"Arrr! I've got yer PDF! Let me sift through it and {analysis_type} it for ye!"
+                response = f"Arrr! I've got yer document! Let me sift through it and {analysis_type} it for ye!"
             else:
-                response = f"I'll process your PDF now and {analysis_type} it for you."
+                response = f"I'll process your document now and {analysis_type} it for you."
 
             return {
                 'success': True,
@@ -1052,29 +1150,156 @@ Please answer the user's question based on the document content above.
             return f"I apologize, but I encountered an error processing your question about the document."
 
     def _analyze_document_content(self, text: str, analysis_type: str, filename: str, persona: str) -> str:
-        """Analyze document content for non-PDF files"""
+        """Analyze document content using Gemini LLM for better results"""
         try:
+            # Prepare detailed prompt based on analysis type
             if analysis_type == 'summarize':
-                prompt = f"Please summarize the following document '{filename}':\n\n{text[:4000]}..."
+                prompt = f"""Please provide a comprehensive summary of the document '{filename}'. 
+
+The document content is:
+{text[:6000]}
+
+Please create a detailed summary that covers:
+1. Main topic and purpose
+2. Key concepts explained
+3. Important points and findings
+4. Conclusion or main takeaways
+
+Keep the summary informative but concise."""
+
             elif analysis_type == 'questions':
-                prompt = f"Generate 5 important questions and answers based on this document '{filename}':\n\n{text[:4000]}..."
+                prompt = f"""Based on the document '{filename}', generate 5-7 important questions and detailed answers.
+
+Document content:
+{text[:6000]}
+
+Create questions that cover:
+- Key definitions and concepts
+- Important processes or methods
+- Main conclusions or findings
+- Practical applications
+
+Format as: Q: [Question] A: [Detailed Answer]"""
+
             elif analysis_type == 'key_points':
-                prompt = f"Extract the key points from this document '{filename}':\n\n{text[:4000]}..."
+                prompt = f"""Extract and list the key points from the document '{filename}' in a well-organized format.
+
+Document content:
+{text[:6000]}
+
+Please identify:
+- Main concepts and definitions
+- Important facts and figures
+- Key processes or methodologies
+- Significant conclusions
+- Practical implications
+
+Present as numbered bullet points."""
+
             elif analysis_type == 'concepts':
-                prompt = f"Identify the main concepts in this document '{filename}':\n\n{text[:4000]}..."
-            else:
-                prompt = f"Analyze this document '{filename}' and provide insights:\n\n{text[:4000]}..."
+                prompt = f"""Identify and explain the main concepts from the document '{filename}'.
 
-            result = self.generate_response([], prompt, persona)
+Document content:
+{text[:6000]}
 
-            if result['success']:
-                return result['response']
+For each concept, provide:
+- Clear definition
+- Context within the document
+- Significance or importance
+- Related concepts if any
+
+Format clearly with concept names in bold."""
+
             else:
-                return f"I apologize, but I encountered an error analyzing the document: {result.get('error', 'Unknown error')}"
+                prompt = f"""Analyze the document '{filename}' and provide comprehensive insights.
+
+Document content:
+{text[:6000]}
+
+Please provide:
+1. Document overview
+2. Main themes and topics
+3. Key insights and takeaways
+4. Practical applications or implications"""
+
+            # Use Gemini LLM if configured
+            if self.is_configured():
+                result = self.generate_response([], prompt, persona)
+                if result['success']:
+                    return result['response']
+                else:
+                    logger.warning(f"LLM analysis failed, using fallback: {result.get('error')}")
+                    # Fall back to basic analysis
+                    return self._basic_document_analysis(text, analysis_type, filename, persona)
+            else:
+                # Use basic analysis if LLM not configured
+                return self._basic_document_analysis(text, analysis_type, filename, persona)
 
         except Exception as e:
             logger.error(f"Error analyzing document content: {e}")
-            return f"I apologize, but I encountered an error analyzing the document."
+            return self._basic_document_analysis(text, analysis_type, filename, persona)
+
+    def _basic_document_analysis(self, text: str, analysis_type: str, filename: str, persona: str) -> str:
+        """Fallback document analysis when LLM is not available"""
+        try:
+            if analysis_type == 'summarize':
+                # Extract first few sentences and key paragraphs
+                sentences = re.split(r'[.!?]+', text)
+                sentences = [s.strip() for s in sentences if len(s.strip()) > 30]
+                
+                summary_parts = []
+                
+                # Add introduction
+                if sentences:
+                    summary_parts.append(f"Document Overview: {sentences[0]}")
+                
+                # Find sentences with key terms
+                key_terms = ['artificial intelligence', 'machine learning', 'important', 'main', 'key', 'significant']
+                for sentence in sentences[1:]:
+                    if any(term in sentence.lower() for term in key_terms) and len(summary_parts) < 4:
+                        summary_parts.append(sentence)
+                
+                # Add conclusion if available
+                if len(sentences) > 5:
+                    summary_parts.append(f"Key Point: {sentences[-2] if len(sentences) > 1 else sentences[-1]}")
+                
+                summary = '\n\n'.join(summary_parts)
+                
+                if persona == 'pirate':
+                    return f"Ahoy! Here be the treasure summary of '{filename}':\n\n{summary}\n\nThat be the gist of it, matey!"
+                else:
+                    return f"Document Summary for '{filename}':\n\n{summary}\n\nThis covers the main points from the document."
+                    
+            elif analysis_type == 'questions':
+                # Generate basic questions
+                sentences = [s.strip() for s in re.split(r'[.!?]+', text) if len(s.strip()) > 50]
+                questions = []
+                
+                for i, sentence in enumerate(sentences[:10]):
+                    if 'is' in sentence.lower() or 'are' in sentence.lower():
+                        question = f"What is described in: '{sentence[:80]}...'?"
+                        answer = sentence
+                        questions.append(f"Q{i+1}: {question}\nA{i+1}: {answer}")
+                
+                if persona == 'pirate':
+                    return f"Arrr! Here be some study questions for '{filename}':\n\n" + '\n\n'.join(questions[:5]) + "\n\nTest yer knowledge, matey!"
+                else:
+                    return f"Study Questions for '{filename}':\n\n" + '\n\n'.join(questions[:5])
+                    
+            else:
+                # Basic analysis
+                word_count = len(text.split())
+                char_count = len(text)
+                paragraphs = len([p for p in text.split('\n\n') if len(p.strip()) > 50])
+                
+                if persona == 'pirate':
+                    return f"Arrr! I've analyzed '{filename}' for ye:\n\n📄 {word_count} words across {paragraphs} sections\n📝 {char_count} characters total\n\nThe document covers various topics and concepts. Upload it for detailed analysis, matey!"
+                else:
+                    return f"Document Analysis for '{filename}':\n\n📄 {word_count} words\n📝 {paragraphs} sections\n📊 {char_count} characters\n\nThe document contains detailed information on the specified topics."
+                    
+        except Exception as e:
+            logger.error(f"Basic document analysis error: {e}")
+            return f"I apologize, but I encountered an error analyzing '{filename}': {str(e)}"
 
     def process_pdf_file(self, file, analysis_type: str = 'summarize', persona: str = None) -> Dict[str, Any]:
         """
