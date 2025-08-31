@@ -44,42 +44,65 @@ class PDFService:
             # Validate file
             is_valid, message = self.is_valid_file(file)
             if not is_valid:
+                logger.error(f"PDF validation failed: {message}")
                 return {
                     'success': False,
                     'error': message
                 }
 
+            logger.info(f"📄 Starting PDF text extraction for: {file.filename}")
+
             # Create temporary file
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
                 file.save(temp_file.name)
+                logger.info(f"📄 PDF saved to temporary file: {temp_file.name}")
                 
                 # Extract text using PyPDF2
                 text_content = ""
                 page_count = 0
+                successful_pages = 0
                 
                 with open(temp_file.name, 'rb') as pdf_file:
-                    pdf_reader = PyPDF2.PdfReader(pdf_file)
-                    page_count = len(pdf_reader.pages)
-                    
-                    for page_num, page in enumerate(pdf_reader.pages):
-                        try:
-                            page_text = page.extract_text()
-                            text_content += f"\n--- Page {page_num + 1} ---\n{page_text}\n"
-                        except Exception as e:
-                            logger.warning(f"Error extracting page {page_num + 1}: {e}")
-                            continue
+                    try:
+                        pdf_reader = PyPDF2.PdfReader(pdf_file)
+                        page_count = len(pdf_reader.pages)
+                        logger.info(f"📄 PDF has {page_count} pages")
+                        
+                        for page_num, page in enumerate(pdf_reader.pages):
+                            try:
+                                page_text = page.extract_text()
+                                if page_text.strip():
+                                    text_content += f"\n--- Page {page_num + 1} ---\n{page_text}\n"
+                                    successful_pages += 1
+                                else:
+                                    logger.warning(f"📄 Page {page_num + 1} appears to be empty")
+                            except Exception as e:
+                                logger.warning(f"📄 Error extracting page {page_num + 1}: {e}")
+                                continue
+                                
+                    except Exception as e:
+                        logger.error(f"📄 Error reading PDF file: {e}")
+                        os.unlink(temp_file.name)
+                        return {
+                            'success': False,
+                            'error': f'Could not read PDF file: {str(e)}'
+                        }
                 
                 # Clean up temporary file
                 os.unlink(temp_file.name)
+                logger.info(f"📄 Temporary file cleaned up")
                 
                 # Clean and validate extracted text
                 text_content = self._clean_text(text_content)
                 
                 if len(text_content.strip()) < 50:
+                    logger.error(f"📄 Extracted text too short: {len(text_content)} characters")
                     return {
                         'success': False,
-                        'error': 'Could not extract readable text from PDF'
+                        'error': f'Could not extract sufficient readable text from PDF. Only {len(text_content)} characters extracted from {successful_pages}/{page_count} pages.'
                     }
+                
+                logger.info(f"📄 Successfully extracted {len(text_content)} characters from {successful_pages}/{page_count} pages")
                 
                 return {
                     'success': True,
@@ -87,11 +110,12 @@ class PDFService:
                     'page_count': page_count,
                     'word_count': len(text_content.split()),
                     'char_count': len(text_content),
-                    'filename': file.filename
+                    'filename': file.filename,
+                    'successful_pages': successful_pages
                 }
                 
         except Exception as e:
-            logger.error(f"PDF text extraction error: {e}")
+            logger.error(f"📄 PDF text extraction error: {e}")
             return {
                 'success': False,
                 'error': f'PDF processing failed: {str(e)}'
@@ -139,40 +163,101 @@ class PDFService:
             }
 
     def _summarize_content(self, text: str) -> Dict[str, Any]:
-        """Create summary of PDF content"""
-        sentences = re.split(r'[.!?]+', text)
-        sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
-        
-        # Extract key sentences
-        key_sentences = []
-        
-        # First sentence
-        if sentences:
-            key_sentences.append(sentences[0])
-        
-        # Sentences with important keywords
-        important_keywords = ['important', 'significant', 'key', 'main', 'conclusion', 'result', 'finding']
-        for sentence in sentences[1:]:
-            if any(keyword in sentence.lower() for keyword in important_keywords):
-                key_sentences.append(sentence)
-                if len(key_sentences) >= 5:
+        """Create comprehensive summary of PDF content"""
+        try:
+            # Split into paragraphs and sentences
+            paragraphs = [p.strip() for p in text.split('\n\n') if len(p.strip()) > 50]
+            sentences = re.split(r'[.!?]+', text)
+            sentences = [s.strip() for s in sentences if len(s.strip()) > 30]
+            
+            # Extract key information
+            key_sentences = []
+            
+            # Introduction sentences (first paragraph)
+            if paragraphs:
+                intro_sentences = re.split(r'[.!?]+', paragraphs[0])
+                intro_sentences = [s.strip() for s in intro_sentences if len(s.strip()) > 20]
+                if intro_sentences:
+                    key_sentences.extend(intro_sentences[:2])
+            
+            # Sentences with important keywords
+            important_keywords = [
+                'introduction', 'overview', 'definition', 'concept', 'principle',
+                'important', 'significant', 'key', 'main', 'primary', 'fundamental',
+                'conclusion', 'result', 'finding', 'summary', 'therefore', 'thus',
+                'artificial intelligence', 'machine learning', 'neural network', 'algorithm'
+            ]
+            
+            for sentence in sentences:
+                if len(key_sentences) >= 8:
                     break
-        
-        # Fill with middle sentences if needed
-        if len(key_sentences) < 3 and len(sentences) > 2:
-            middle_start = len(sentences) // 3
-            middle_end = 2 * len(sentences) // 3
-            key_sentences.extend(sentences[middle_start:middle_end][:3-len(key_sentences)])
-        
-        summary = '. '.join(key_sentences[:5]) + '.'
-        
-        return {
-            'success': True,
-            'summary': summary,
-            'original_length': len(text.split()),
-            'summary_length': len(summary.split()),
-            'compression_ratio': f"{len(summary.split())}/{len(text.split())} words"
-        }
+                    
+                sentence_lower = sentence.lower()
+                if any(keyword in sentence_lower for keyword in important_keywords):
+                    if sentence not in key_sentences and len(sentence) > 30:
+                        key_sentences.append(sentence)
+            
+            # Add conclusion sentences (last paragraph)
+            if paragraphs and len(paragraphs) > 1:
+                conclusion_sentences = re.split(r'[.!?]+', paragraphs[-1])
+                conclusion_sentences = [s.strip() for s in conclusion_sentences if len(s.strip()) > 20]
+                if conclusion_sentences:
+                    for conc_sent in conclusion_sentences[:2]:
+                        if conc_sent not in key_sentences:
+                            key_sentences.append(conc_sent)
+            
+            # Ensure we have enough content
+            if len(key_sentences) < 3:
+                # Add more sentences from the middle
+                middle_start = len(sentences) // 3
+                middle_end = 2 * len(sentences) // 3
+                additional_sentences = sentences[middle_start:middle_end]
+                
+                for sent in additional_sentences:
+                    if len(key_sentences) >= 6:
+                        break
+                    if sent not in key_sentences and len(sent) > 30:
+                        key_sentences.append(sent)
+            
+            # Create comprehensive summary
+            if key_sentences:
+                summary = '. '.join(key_sentences[:6]) + '.'
+                
+                # Clean up the summary
+                summary = re.sub(r'\s+', ' ', summary)
+                summary = re.sub(r'\.+', '.', summary)
+                
+                return {
+                    'success': True,
+                    'summary': summary,
+                    'original_length': len(text.split()),
+                    'summary_length': len(summary.split()),
+                    'compression_ratio': f"{len(summary.split())}/{len(text.split())} words",
+                    'key_points_extracted': len(key_sentences)
+                }
+            else:
+                # Fallback summary
+                words = text.split()
+                if len(words) > 100:
+                    summary = ' '.join(words[:100]) + '...'
+                else:
+                    summary = text[:500] + '...'
+                
+                return {
+                    'success': True,
+                    'summary': summary,
+                    'original_length': len(text.split()),
+                    'summary_length': len(summary.split()),
+                    'compression_ratio': f"{len(summary.split())}/{len(text.split())} words",
+                    'key_points_extracted': 0
+                }
+                
+        except Exception as e:
+            logger.error(f"Error in content summarization: {e}")
+            return {
+                'success': False,
+                'error': f'Summary generation failed: {str(e)}'
+            }
 
     def _generate_questions(self, text: str) -> Dict[str, Any]:
         """Generate questions and answers from PDF content"""
