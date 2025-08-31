@@ -1,0 +1,22 @@
+
+{
+    "name": "VoxAura AI - Voice Assistant",
+    "short_name": "VoxAura AI",
+    "description": "Advanced AI Voice Assistant powered by cutting-edge technology",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1e1b4b",
+    "theme_color": "#4facfe",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/static/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["productivity", "utilities"],
+    "lang": "en",
+    "dir": "ltr"
+}
