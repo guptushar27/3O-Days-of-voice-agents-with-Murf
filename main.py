@@ -18,23 +18,22 @@ from services.websocket_service import WebSocketService
 from services.llm_service import LLMService
 from services.stt_service import STTService
 from services.tts_service import TTSService
-from services.pdf_service import PDFService # Import PDFService for document processing
+from services.pdf_service import PDFService  # Import PDFService for document processing
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('voxaura.log'),
-        logging.StreamHandler()
-    ])
+    handlers=[logging.FileHandler('voxaura.log'),
+              logging.StreamHandler()])
 logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY',
                                           'voxaura-day21-secret-key')
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB limit for file uploads
+app.config[
+    'MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit for file uploads
 
 # Initialize SocketIO
 socketio = SocketIO(app,
@@ -52,6 +51,7 @@ tts_service = None
 
 # --- API Key Management and Service Initialization ---
 
+
 def get_configured_api_keys():
     """Retrieves API keys from session first, then environment variables"""
     # Check if we're in a request context
@@ -59,23 +59,32 @@ def get_configured_api_keys():
 
     if has_request_context():
         # Prioritize session (user-provided) keys over environment keys when in request context
-        assemblyai_key = session.get('assemblyai_api_key') or os.environ.get('ASSEMBLYAI_API_KEY')
-        gemini_key = session.get('gemini_api_key') or os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_AI_API_KEY')
-        murf_key = session.get('murf_api_key') or os.environ.get('MURF_API_KEY')
-        weather_key = session.get('openweather_api_key') or os.environ.get('WEATHER_API_KEY') or os.environ.get('OPENWEATHER_API_KEY')
+        assemblyai_key = session.get('assemblyai_api_key') or os.environ.get(
+            'ASSEMBLYAI_API_KEY')
+        gemini_key = session.get('gemini_api_key') or os.environ.get(
+            'GEMINI_API_KEY') or os.environ.get('GOOGLE_AI_API_KEY')
+        murf_key = session.get('murf_api_key') or os.environ.get(
+            'MURF_API_KEY')
+        weather_key = session.get('weather_api_key') or session.get(
+            'openweather_api_key') or os.environ.get(
+                'WEATHER_API_KEY') or os.environ.get('OPENWEATHER_API_KEY')
     else:
         # Use only environment variables during startup
         assemblyai_key = os.environ.get('ASSEMBLYAI_API_KEY')
-        gemini_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_AI_API_KEY')
+        gemini_key = os.environ.get('GEMINI_API_KEY') or os.environ.get(
+            'GOOGLE_AI_API_KEY')
         murf_key = os.environ.get('MURF_API_KEY')
-        weather_key = os.environ.get('WEATHER_API_KEY') or os.environ.get('OPENWEATHER_API_KEY')
+        weather_key = os.environ.get('WEATHER_API_KEY') or os.environ.get(
+            'OPENWEATHER_API_KEY')
 
     return {
         'assemblyai_api_key': assemblyai_key,
         'gemini_api_key': gemini_key,
         'murf_api_key': murf_key,
-        'openweather_api_key': weather_key
+        'openweather_api_key': weather_key,
+        'weather_api_key': weather_key
     }
+
 
 def initialize_services(api_keys):
     """Initializes services with provided API keys"""
@@ -87,10 +96,12 @@ def initialize_services(api_keys):
         tts_service = TTSService(api_key=api_keys.get('murf_api_key'))
 
         # LLMService initialization
-        gemini_key = api_keys.get('gemini_api_key') or api_keys.get('google_ai_api_key')
+        gemini_key = api_keys.get('gemini_api_key') or api_keys.get(
+            'google_ai_api_key')
         llm_service = LLMService(gemini_api_key=gemini_key)
 
-        websocket_service = WebSocketService(llm_service=llm_service, tts_service=tts_service)
+        websocket_service = WebSocketService(llm_service=llm_service,
+                                             tts_service=tts_service)
         logger.info("Services initialized successfully.")
 
     except Exception as e:
@@ -100,14 +111,17 @@ def initialize_services(api_keys):
             stt_service = STTService(api_key=None)
             tts_service = TTSService(api_key=None)
             llm_service = LLMService(gemini_api_key=None)
-            websocket_service = WebSocketService(llm_service=llm_service, tts_service=tts_service)
+            websocket_service = WebSocketService(llm_service=llm_service,
+                                                 tts_service=tts_service)
             logger.info("Services initialized with fallback configuration.")
         except Exception as fallback_error:
-            logger.error(f"Failed to initialize fallback services: {fallback_error}")
+            logger.error(
+                f"Failed to initialize fallback services: {fallback_error}")
             stt_service = None
             tts_service = None
             llm_service = None
             websocket_service = None
+
 
 def check_api_configuration():
     """Check API key configuration and print status"""
@@ -130,7 +144,8 @@ def check_api_configuration():
         f"Gemini AI (LLM): {'✅ Configured' if config_status['gemini'] else '❌ Missing GEMINI_API_KEY or GOOGLE_AI_API_KEY'}"
     )
     print(
-        f"Murf AI (TTS): {'✅ Configured' if config_status['murf'] else '❌ Missing MURF_API_KEY'}")
+        f"Murf AI (TTS): {'✅ Configured' if config_status['murf'] else '❌ Missing MURF_API_KEY'}"
+    )
     print(
         f"Weather API (Enhanced): {'✅ Configured' if config_status['weather'] else '❌ Missing WEATHER_API_KEY or OPENWEATHER_API_KEY'}"
     )
@@ -144,19 +159,22 @@ def check_api_configuration():
         print(
             "\n💡 Tip: For enhanced weather features (hourly forecast, air quality, alerts, clothing suggestions),"
         )
-        print("   get a free API key from WeatherAPI.com: https://www.weatherapi.com/signup.aspx")
+        print(
+            "   get a free API key from WeatherAPI.com: https://www.weatherapi.com/signup.aspx"
+        )
         print("   or use your OpenWeatherMap API key as OPENWEATHER_API_KEY.")
         print("   Add it to your .env file or the UI configuration.")
         print("-" * 60)
 
     return config_status
 
+
 # Initialize services with keys from environment or session
 initial_api_keys = get_configured_api_keys()
 initialize_services(initial_api_keys)
 
-
 # --- Routes ---
+
 
 @app.route('/')
 def index():
@@ -179,7 +197,8 @@ def llm_query():
         data = request.get_json()
         if not data:
             return jsonify({
-                'response': 'I apologize, but I didn\'t receive your message properly. Please try again.',
+                'response':
+                'I apologize, but I didn\'t receive your message properly. Please try again.',
                 'success': True,
                 'model_used': 'fallback'
             })
@@ -209,15 +228,13 @@ def llm_query():
         # Initialize LLM service with API keys
         llm_service = LLMService(
             gemini_api_key=api_keys.get('gemini_api_key'),
-            weather_api_key=api_keys.get('openweather_api_key')
-        )
+            weather_api_key=api_keys.get('weather_api_key')
+            or api_keys.get('openweather_api_key'))
 
         # Generate response
-        result = llm_service.generate_response(
-            chat_messages=[],
-            user_message=message,
-            persona=persona
-        )
+        result = llm_service.generate_response(chat_messages=[],
+                                               user_message=message,
+                                               persona=persona)
 
         if result['success']:
             return jsonify({
@@ -228,7 +245,10 @@ def llm_query():
             })
         else:
             # Always return success with fallback response to prevent UI errors
-            fallback_msg = result.get('fallback_response', 'I apologize, but I encountered an error processing your message. Please check your API keys in Settings.')
+            fallback_msg = result.get(
+                'fallback_response',
+                'I apologize, but I encountered an error processing your message. Please check your API keys in Settings.'
+            )
             return jsonify({
                 'response': fallback_msg,
                 'success': True,
@@ -240,7 +260,8 @@ def llm_query():
         logger.error(f"LLM query error: {str(e)}")
         # Return success with error message to prevent UI errors
         return jsonify({
-            'response': 'I apologize, but I encountered a technical issue. Please check your API keys in Settings and try again.',
+            'response':
+            'I apologize, but I encountered a technical issue. Please check your API keys in Settings and try again.',
             'success': True,
             'model_used': 'fallback',
             'error_info': str(e)
@@ -253,7 +274,10 @@ def generate_tts():
     try:
         data = request.json
         if not data or 'text' not in data:
-            return jsonify({'success': False, 'error': 'Text is required'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'Text is required'
+            }), 400
 
         text = data['text']
         persona = data.get('persona', 'default')
@@ -275,11 +299,13 @@ def generate_tts():
         else:
             api_keys = data.get('api_keys', {})
 
-        murf_key = api_keys.get('murf_api_key') or os.environ.get('MURF_API_KEY')
+        murf_key = api_keys.get('murf_api_key') or os.environ.get(
+            'MURF_API_KEY')
 
         # Create new TTS service instance with user's API key
         current_tts_service = TTSService(app=app, api_key=murf_key)
-        result = current_tts_service.generate_speech(text=text, persona=persona)
+        result = current_tts_service.generate_speech(text=text,
+                                                     persona=persona)
 
         if result['success']:
             return jsonify({
@@ -289,10 +315,7 @@ def generate_tts():
                 'service_used': result.get('service_used', 'gTTS')
             })
         else:
-            return jsonify({
-                'success': False,
-                'error': result['error']
-            })
+            return jsonify({'success': False, 'error': result['error']})
 
     except Exception as e:
         logger.error(f"TTS generation error: {str(e)}")
@@ -300,8 +323,6 @@ def generate_tts():
             'success': False,
             'error': f'TTS generation failed: {str(e)}'
         }), 500
-
-
 
 
 @app.route('/test-llm')
@@ -335,7 +356,10 @@ def agent_chat(session_id):
     """Enhanced chat endpoint with complete pipeline"""
     try:
         if 'audio' not in request.files and 'file' not in request.files:
-            return jsonify({'success': False, 'error': 'No audio or file provided'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'No audio or file provided'
+            }), 400
 
         persona = request.form.get('persona', 'default')
         logger.info(f"Using persona: {persona}")
@@ -358,122 +382,137 @@ def agent_chat(session_id):
         if 'file' in request.files:
             file = request.files['file']
             if file.filename == '':
-                return jsonify({'success': False, 'error': 'No file selected'}), 400
+                return jsonify({
+                    'success': False,
+                    'error': 'No file selected'
+                }), 400
 
-            logger.info(f"Processing file upload for session: {session_id}, Filename: {file.filename}")
+            logger.info(
+                f"Processing file upload for session: {session_id}, Filename: {file.filename}"
+            )
 
             # Check file type and size (already handled in upload_pdf, but good to have here too)
             allowed_extensions = {'.pdf', '.doc', '.docx', '.txt'}
             file_ext = os.path.splitext(file.filename)[1].lower()
             if file_ext not in allowed_extensions:
-                return jsonify({'success': False, 'error': 'Unsupported file type'}), 400
+                return jsonify({
+                    'success': False,
+                    'error': 'Unsupported file type'
+                }), 400
 
             file.seek(0, 2)
             file_size = file.tell()
             file.seek(0)
-            if file_size > 10 * 1024 * 1024: # 10MB limit
-                return jsonify({'success': False, 'error': 'File size too large (max 10MB)'}), 400
-
-            # Use PDFService for text extraction
-            pdf_service = PDFService()
-            extraction_result = pdf_service.extract_text_from_file(file)
-
-            if not extraction_result['success']:
-                return jsonify({'success': False, 'error': f"Document processing failed: {extraction_result['error']}"}), 400
-
-            extracted_text = extraction_result['text']
-            logger.info(f"Document processed: {len(extracted_text)} characters extracted")
-
-            # Prepare prompt for LLM
-            user_query = request.form.get('user_query', 'Please summarize this document')
-            prompt = f"Document: {file.filename}\nUser Query: {user_query}\nContent:\n{extracted_text}"
-
-            # LLM Processing
-            gemini_key = api_keys.get('gemini_api_key') or os.environ.get('GEMINI_API_KEY')
-            llm_service = LLMService(gemini_api_key=gemini_key)
-            llm_result = llm_service.generate_response(
-                chat_messages=[],
-                user_message=prompt,
-                persona=persona
-            )
-
-            if not llm_result['success']:
+            if file_size > 10 * 1024 * 1024:  # 10MB limit
                 return jsonify({
                     'success': False,
-                    'error': llm_result['error'],
-                    'fallback_message': llm_result.get('fallback_response', 'AI response generation failed')
-                }), 500
+                    'error': 'File size too large (max 10MB)'
+                }), 400
 
-            llm_response = llm_result['response']
-            logger.info(f"LLM Success: Generated {len(llm_response)} character response")
+            # Get analysis type from request or default to summarize
+            analysis_type = request.form.get('analysis_type', 'summarize')
+            user_query = request.form.get(
+                'user_query',
+                'Please provide a comprehensive summary of this document')
 
-            # TTS Processing
-            murf_key = api_keys.get('murf_api_key') or os.environ.get('MURF_API_KEY')
-            tts_service = TTSService(api_key=murf_key)
-            tts_result = tts_service.generate_speech(text=llm_response, persona=persona)
-            audio_url = tts_result['audio_url'] if tts_result['success'] else None
-            if not audio_url:
-                logger.warning(f"TTS failed: {tts_result.get('error')}")
+            # Initialize LLM service with API keys for document processing
+            gemini_key = api_keys.get('gemini_api_key') or os.environ.get(
+                'GEMINI_API_KEY')
+            weather_key = api_keys.get('weather_api_key') or api_keys.get('openweather_api_key') or os.environ.get('WEATHER_API_KEY') or os.environ.get('OPENWEATHER_API_KEY')
+            
+            current_llm_service = LLMService(
+                gemini_api_key=gemini_key,
+                weather_api_key=weather_key
+            )
 
-            return jsonify({
-                'success': True,
-                'response': llm_response,
-                'session_id': session_id,
-                'persona': persona,
-                'filename': file.filename,
-                'audio_url': audio_url
-            })
+            # Use LLM service for document processing
+            result = current_llm_service.process_document_file(
+                file,
+                analysis_type=analysis_type,
+                persona=persona,
+                user_query=user_query)
+
+            if result['success']:
+                return jsonify({
+                    'success': True,
+                    'response': result['response'],
+                    'file_info': result.get('file_info', {}),
+                    'analysis_type': result.get('analysis_type', analysis_type),
+                    'filename': file.filename,
+                    'persona': persona,
+                    'document_stats': {
+                        'size_mb': round(file_size / (1024 * 1024), 2),
+                        'text_length': result.get('file_info', {}).get('word_count', 0),
+                        'response_length': len(result['response'])
+                    }
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': result.get('error', 'Document processing failed')
+                }), 400
 
         # Handle audio input for voice chat
         if 'audio' in request.files:
             audio_file = request.files['audio']
             if audio_file.filename == '':
-                return jsonify({'success': False, 'error': 'No audio file selected'}), 400
+                return jsonify({
+                    'success': False,
+                    'error': 'No audio file selected'
+                }), 400
 
             logger.info(f"Processing audio message for session: {session_id}")
 
             # 1. STT Processing
-            assemblyai_key = api_keys.get('assemblyai_api_key') or os.environ.get('ASSEMBLYAI_API_KEY')
+            assemblyai_key = api_keys.get(
+                'assemblyai_api_key') or os.environ.get('ASSEMBLYAI_API_KEY')
             stt_service = STTService(api_key=assemblyai_key)
             stt_result = stt_service.transcribe_audio(audio_file)
 
             if not stt_result['success']:
                 return jsonify({
-                    'success': False,
-                    'error': stt_result['error'],
-                    'fallback_message': stt_result.get('fallback_message', 'Speech recognition failed')
+                    'success':
+                    False,
+                    'error':
+                    stt_result['error'],
+                    'fallback_message':
+                    stt_result.get('fallback_message',
+                                   'Speech recognition failed')
                 }), 400
 
             transcription = stt_result['transcription']
             logger.info(f"STT Success: {transcription}")
 
             # 2. LLM Processing
-            gemini_key = api_keys.get('gemini_api_key') or os.environ.get('GEMINI_API_KEY')
+            gemini_key = api_keys.get('gemini_api_key') or os.environ.get(
+                'GEMINI_API_KEY')
             llm_service = LLMService(gemini_api_key=gemini_key)
             llm_result = llm_service.generate_response(
-                chat_messages=[],
-                user_message=transcription,
-                persona=persona
-            )
+                chat_messages=[], user_message=transcription, persona=persona)
 
             if not llm_result['success']:
                 return jsonify({
-                    'success': False,
-                    'error': llm_result['error'],
-                    'fallback_message': llm_result.get('fallback_response', 'AI response generation failed')
+                    'success':
+                    False,
+                    'error':
+                    llm_result['error'],
+                    'fallback_message':
+                    llm_result.get('fallback_response',
+                                   'AI response generation failed')
                 }), 500
 
             llm_response = llm_result['response']
-            logger.info(f"LLM Success: Generated {len(llm_response)} character response")
+            logger.info(
+                f"LLM Success: Generated {len(llm_response)} character response"
+            )
 
             # 3. TTS Processing (with error handling)
-            murf_key = api_keys.get('murf_api_key') or os.environ.get('MURF_API_KEY')
+            murf_key = api_keys.get('murf_api_key') or os.environ.get(
+                'MURF_API_KEY')
             tts_service = TTSService(api_key=murf_key)
             try:
-                tts_result = tts_service.generate_speech(
-                    text=llm_response,
-                    persona=persona
-                )
+                tts_result = tts_service.generate_speech(text=llm_response,
+                                                         persona=persona)
 
                 audio_url = None
                 if tts_result['success']:
@@ -508,9 +547,12 @@ def agent_chat(session_id):
     except Exception as e:
         logger.error(f"Agent chat error: {str(e)}")
         return jsonify({
-            'success': False,
-            'error': 'Internal server error',
-            'fallback_message': 'Voice processing service is temporarily unavailable'
+            'success':
+            False,
+            'error':
+            'Internal server error',
+            'fallback_message':
+            'Voice processing service is temporarily unavailable'
         }), 500
 
 
@@ -525,22 +567,18 @@ def clear_chat_history(session_id):
     """Clear chat history for a session"""
     return jsonify({'success': True})
 
+
 # --- API Configuration Routes ---
 @app.route('/api/config', methods=['GET'])
 def get_config_status():
     """Get current API configuration status"""
     try:
         config_status = check_api_configuration()
-        return jsonify({
-            'success': True,
-            'config_status': config_status
-        })
+        return jsonify({'success': True, 'config_status': config_status})
     except Exception as e:
         logger.error(f"Error getting configuration status: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/api/config', methods=['POST'])
 def update_config():
@@ -572,10 +610,16 @@ def update_config():
             updated = True
             logger.info("OpenWeather API Key updated.")
 
+        if 'weather_api_key' in data and data['weather_api_key']:
+            session['weather_api_key'] = data['weather_api_key']
+            updated = True
+            logger.info("WeatherAPI.com Key updated.")
+
         # Re-initialize services if any API key was updated
         if updated:
             try:
-                logger.info("Re-initializing services with updated API keys...")
+                logger.info(
+                    "Re-initializing services with updated API keys...")
                 current_api_keys = get_configured_api_keys()
                 initialize_services(current_api_keys)
                 logger.info("Services re-initialized successfully.")
@@ -585,7 +629,8 @@ def update_config():
 
                 return jsonify({
                     'success': True,
-                    'message': 'Configuration updated successfully. Services reloaded.',
+                    'message':
+                    'Configuration updated successfully. Services reloaded.',
                     'services_updated': updated,
                     'config_status': config_status
                 })
@@ -593,7 +638,8 @@ def update_config():
                 logger.error(f"Failed to reinitialize services: {e}")
                 return jsonify({
                     'success': False,
-                    'message': f'Configuration updated but service reload failed: {str(e)}',
+                    'message':
+                    f'Configuration updated but service reload failed: {str(e)}',
                     'services_updated': updated,
                     'config_status': check_api_configuration()
                 }), 500
@@ -606,24 +652,27 @@ def update_config():
 
     except Exception as e:
         logger.error(f"Error updating configuration: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/upload_document', methods=['POST'])
 def upload_document():
     try:
         if 'file' not in request.files:
-            return jsonify({'success': False, 'error': 'No file provided'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
 
         file = request.files['file']
         analysis_type = request.form.get('analysis_type', 'summarize')
         persona = request.form.get('persona', 'default')
 
         if file.filename == '':
-            return jsonify({'success': False, 'error': 'No file selected'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
 
         api_keys_header = request.headers.get('X-API-Keys')
         api_keys = {}
@@ -637,54 +686,48 @@ def upload_document():
         file_ext = os.path.splitext(file.filename)[1].lower()
 
         if file_ext not in allowed_extensions:
-            return jsonify({'success': False, 'error': 'Unsupported file type'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'Unsupported file type'
+            }), 400
 
         file.seek(0, 2)
         file_size = file.tell()
         file.seek(0)
 
         if file_size > 10 * 1024 * 1024:
-            return jsonify({'success': False, 'error': 'File size too large (max 10MB)'}), 400
-
-        pdf_service = PDFService()
-        extraction_result = pdf_service.extract_text_from_file(file)
-
-        if not extraction_result['success']:
             return jsonify({
                 'success': False,
-                'error': f"Document processing failed: {extraction_result['error']}"
+                'error': 'File size too large (max 10MB)'
             }), 400
-
-        extracted_text = extraction_result['text']
-        logger.info(f"Document processed: {len(extracted_text)} characters extracted")
 
         gemini_key = api_keys.get('gemini_api_key') or os.environ.get('GEMINI_API_KEY')
-        if not gemini_key:
-            return jsonify({
-                'success': False,
-                'error': 'Gemini API key required for document analysis'
-            }), 400
-
-        llm_service = LLMService(gemini_api_key=gemini_key)
-
-        if analysis_type == 'summarize':
-            prompt = f"Please provide a comprehensive summary of the following document:\n\n{extracted_text}"
-        else:
-            prompt = f"Analyze this document and provide insights:\n\n{extracted_text}"
-
-        llm_result = llm_service.generate_response(
-            chat_messages=[],
-            user_message=prompt,
-            persona=persona
+        weather_key = api_keys.get('weather_api_key') or api_keys.get('openweather_api_key') or os.environ.get('WEATHER_API_KEY') or os.environ.get('OPENWEATHER_API_KEY')
+        
+        # Initialize LLM service with API keys
+        llm_service = LLMService(gemini_api_key=gemini_key, weather_api_key=weather_key)
+        
+        # Use the LLM service's document processing method
+        result = llm_service.process_document_file(
+            file,
+            analysis_type=analysis_type,
+            persona=persona,
+            user_query=f"Please provide a comprehensive {analysis_type} of this document"
         )
 
-        if not llm_result['success']:
+        if not result['success']:
             return jsonify({
                 'success': False,
-                'error': 'Failed to generate AI response for the document'
-            }), 500
+                'error': result.get('error', 'Document processing failed')
+            }), 400
 
-        response_text = llm_result['response']
+        response_text = result['response']
+        
+        # Extract file info from result
+        file_info = result.get('file_info', {})
+        extracted_text_length = file_info.get('word_count', 0)
+        
+        logger.info(f"Document processed successfully: {extracted_text_length} words -> {len(response_text)} chars response")
 
         logger.info(f"Document analysis completed for {file.filename}")
 
@@ -704,8 +747,10 @@ def upload_document():
     except Exception as e:
         logger.error(f"Document upload error: {str(e)}")
         return jsonify({
-            'success': False,
-            'error': 'Internal server error during document processing'
+            'success':
+            False,
+            'error':
+            'Internal server error during document processing'
         }), 500
 
 
@@ -1105,14 +1150,18 @@ if __name__ == '__main__':
     print("  • 🎭 Enhanced Persona Voice Characteristics")
     print("=" * 60)
 
-    check_api_configuration() # Display initial configuration status
+    check_api_configuration()  # Display initial configuration status
     print("=" * 60)
 
     # Run the application with SocketIO
     try:
         port = int(os.environ.get('PORT', 5000))
         print(f"🚀 Starting server on port {port}")
-        socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)
+        socketio.run(app,
+                     host='0.0.0.0',
+                     port=port,
+                     debug=False,
+                     allow_unsafe_werkzeug=True)
     except Exception as e:
         logger.error(f"Failed to start server: {e}")
         print("❌ Server startup failed. Check the logs for details.")
